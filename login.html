@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>помідор</title>
+    <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo">помідор</h1>
+            <div class="user-avatar">
+                <div class="avatar-circle"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="form-container">
+            <form id="registerForm" class="register-form">
+                <h2 class="form-title">Register</h2>
+                
+                <div class="form-group">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" id="username" name="username" class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" id="email" name="email" class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Пароль</label>
+                    <input type="password" id="password" name="password" class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword" class="form-label">Підтвердьте пароль</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" class="form-input">
+                </div>
+
+                <button type="submit" class="submit-btn">Створити акаунт</button>
+
+                <div class="form-footer">
+                    <p>Вже маєте акаунт? <a href="#" class="login-link">Увійти</a></p>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="js/login.js"></script>
+</body>
+</html>
