@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Group</title>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="/" class="logo">помідор</a>
+            <div class="user-avatar">
+                <div class="avatar-circle"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="form-container">
+            <h2 class="form-title">Create group</h2>
+            
+            <!-- Django Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Error Display -->
+            {% if error %}
+                <div class="error-message">{{ error }}</div>
+            {% endif %}
+
+            <!-- Success Display -->
+            {% if success %}
+                <div class="success-message">{{ success }}</div>
+            {% endif %}
+
+            <!-- Form -->
+            <form method="post" id="createGroupForm">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="name" class="form-label">Name</label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name" 
+                        class="form-input" 
+                        value="{% if form.name.value %}{{ form.name.value }}{% endif %}"
+                        placeholder="Enter group name"
+                        required
+                        maxlength="100"
+                    >
+                    {% if form.name.errors %}
+                        <div class="error-message">
+                            {% for error in form.name.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Create friend group
+                </button>
+            </form>
+
+            <!-- Back Link -->
+            <div class="back-link">
+                <a href="{% url 'dashboard' %}">← Back to Dashboard</a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
