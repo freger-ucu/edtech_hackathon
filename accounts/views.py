@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 import json
-from .models import Group, Subject, Task, Subtask
+from .models import Group, Subject, Task, Subtask, SubtaskCompletion
 from django.urls import reverse
 
 # Create your views here.
@@ -131,7 +131,17 @@ def group_detail(request, group_id):
     if request.user not in group.users.all():
         return redirect('home')
     share_link = request.build_absolute_uri(reverse('group_join', args=[group.share_uuid]))
-    context = {'group': group, 'share_link': share_link}
+    deadlines = Task.objects.filter(subject__group=group).order_by('deadline')
+    # Group leaderboard: % of completed subtasks for all users in the group
+    all_subtasks = Subtask.objects.filter(task__subject__group=group)
+    group_leaderboard = []
+    total = all_subtasks.count()
+    for user in group.users.all():
+        completed = SubtaskCompletion.objects.filter(user=user, subtask__in=all_subtasks).count()
+        percent = int((completed / total) * 100) if total > 0 else 0
+        group_leaderboard.append({'user': user, 'percent': percent, 'completed': completed, 'total': total})
+    group_leaderboard.sort(key=lambda x: x['percent'], reverse=True)
+    context = {'group': group, 'share_link': share_link, 'deadlines': deadlines, 'group_leaderboard': group_leaderboard}
     if request.method == 'POST' and 'leave' in request.POST:
         group.users.remove(request.user)
         return redirect('home')
@@ -178,7 +188,16 @@ def subject_detail(request, subject_id):
         if name:
             Task.objects.create(name=name, description=description, deadline=deadline, subject=subject)
     tasks = subject.tasks.all()
-    return render(request, 'subject_detail.html', {'subject': subject, 'tasks': tasks})
+    # Subject leaderboard: % of completed subtasks for all users in the group for this subject
+    all_subtasks = Subtask.objects.filter(task__subject=subject)
+    subject_leaderboard = []
+    total = all_subtasks.count()
+    for user in group.users.all():
+        completed = SubtaskCompletion.objects.filter(user=user, subtask__in=all_subtasks).count()
+        percent = int((completed / total) * 100) if total > 0 else 0
+        subject_leaderboard.append({'user': user, 'percent': percent, 'completed': completed, 'total': total})
+    subject_leaderboard.sort(key=lambda x: x['percent'], reverse=True)
+    return render(request, 'subject_detail.html', {'subject': subject, 'tasks': tasks, 'subject_leaderboard': subject_leaderboard})
 
 @login_required
 def delete_task(request, task_id):
@@ -195,13 +214,31 @@ def task_detail(request, task_id):
     group = subject.group
     if request.user not in group.users.all():
         return redirect('home')
+    # Toggle subtask completion
+    if request.method == 'POST' and 'toggle_subtask' in request.POST:
+        subtask_id = request.POST.get('toggle_subtask')
+        subtask = Subtask.objects.get(id=subtask_id)
+        completion, created = SubtaskCompletion.objects.get_or_create(user=request.user, subtask=subtask)
+        if not created:
+            completion.delete()
     if request.method == 'POST' and 'create_subtask' in request.POST:
         name = request.POST.get('name')
         description = request.POST.get('description')
         if name:
             Subtask.objects.create(name=name, description=description, task=task)
     subtasks = task.subtasks.all()
-    return render(request, 'task_detail.html', {'task': task, 'subtasks': subtasks})
+    # Leaderboard: user -> % of completed subtasks for this task
+    leaderboard = []
+    users = group.users.all()
+    total = subtasks.count()
+    for user in users:
+        completed = SubtaskCompletion.objects.filter(user=user, subtask__in=subtasks).count()
+        percent = int((completed / total) * 100) if total > 0 else 0
+        leaderboard.append({'user': user, 'percent': percent, 'completed': completed, 'total': total})
+    leaderboard.sort(key=lambda x: x['percent'], reverse=True)
+    # For current user: set of completed subtask ids
+    completed_subtasks = set(SubtaskCompletion.objects.filter(user=request.user, subtask__in=subtasks).values_list('subtask_id', flat=True))
+    return render(request, 'task_detail.html', {'task': task, 'subtasks': subtasks, 'leaderboard': leaderboard, 'completed_subtasks': completed_subtasks})
 
 @login_required
 def delete_subtask(request, subtask_id):

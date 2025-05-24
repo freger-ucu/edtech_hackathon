@@ -29,6 +29,24 @@
         <input type="text" name="name" placeholder="Subject name">
         <button type="submit">Додати предмет</button>
     </form>
+    <h3>Груповий лідерборд:</h3>
+    <ul>
+        {% for entry in group_leaderboard %}
+            <li>{{ entry.user.username }}: {{ entry.percent }}% ({{ entry.completed }}/{{ entry.total }})</li>
+        {% endfor %}
+    </ul>
+    <h3>Дедлайни групи:</h3>
+    <ul>
+        {% for task in deadlines %}
+            <li>
+                <a href="/task/{{ task.id }}/">{{ task.name }}</a>
+                ({{ task.subject.name }}) —
+                {% if task.deadline %}{{ task.deadline|date:'Y-m-d H:i' }}{% else %}без дедлайну{% endif %}
+            </li>
+        {% empty %}
+            <li>Немає дедлайнів.</li>
+        {% endfor %}
+    </ul>
     <form method="post">
         {% csrf_token %}
         <button type="submit" name="leave">Вийти з групи</button>
