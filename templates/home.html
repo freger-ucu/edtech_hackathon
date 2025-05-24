@@ -1,43 +1,52 @@
 {% extends 'base.html' %}
-{% block title %}Home{% endblock %}
+{% block title %}Main{% endblock %}
 {% block content %}
-<h2>Welcome, {{ request.user.username }}!</h2>
-<form method="post" action="/logout/">
-    {% csrf_token %}
-    <button type="submit">Вийти з акаунту</button>
-</form>
-<h3>Your groups:</h3>
-<ul>
-    {% for group in groups %}
-        <li>
-            <a href="/group/{{ group.id }}/">{{ group.name }}</a>
-            <ul>
-                {% for user in group.users.all %}
-                    <li>{{ user.username }}</li>
-                {% endfor %}
-            </ul>
-        </li>
-    {% empty %}
-        <li>No groups yet.</li>
-    {% endfor %}
-</ul>
-<a href="/create_group/">Create new group</a>
-<h3>Всі дедлайни:</h3>
-<ul>
-    {% for task in tasks %}
-        <li>
-            <a href="/task/{{ task.id }}/">{{ task.name }}</a>
-            ({{ task.subject.name }} / {{ task.subject.group.name }}) —
-            {% if task.deadline %}
-                <span class="deadline-timer" data-deadline="{{ task.deadline|date:'c' }}"></span>
-            {% else %}
-                без дедлайну
-            {% endif %}
-        </li>
-    {% empty %}
-        <li>Немає дедлайнів.</li>
-    {% endfor %}
-</ul>
+<div class="main-layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <span style="font-family:'Press Start 2P',monospace;font-size:1.3em;color:#fff;display:flex;align-items:center;gap:10px;">
+                <span style="font-size:2em;vertical-align:middle;">🟪</span> PLIDNO
+            </span>
+        </div>
+        <form method="post" action="/logout/" style="margin-bottom:24px;">
+            {% csrf_token %}
+            <button type="submit" class="sidebar-btn logout-btn">Logout</button>
+        </form>
+        <button class="sidebar-btn join-btn">Join community</button>
+        <button class="sidebar-btn create-btn">Create community</button>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Your communities</div>
+            {% for group in groups %}
+                <a href="/group/{{ group.id }}/" class="sidebar-group">{{ group.name }}</a>
+            {% empty %}
+                <div class="sidebar-group empty">No groups yet.</div>
+            {% endfor %}
+        </div>
+    </aside>
+    <section class="deadlines-section">
+        <h2 class="deadlines-title">Your deadlines</h2>
+        <div class="deadlines-list">
+            {% for task in tasks %}
+                <div class="deadline-card">
+                    <div class="deadline-path">{{ task.subject.group.name }} &gt; {{ task.subject.name }}</div>
+                    <div class="deadline-title">{{ task.name }}</div>
+                    <div class="deadline-when">
+                        {% if task.deadline %}
+                            <span class="deadline-timer" data-deadline="{{ task.deadline|date:'c' }}"></span>
+                        {% else %}
+                            No deadline
+                        {% endif %}
+                    </div>
+                    <div class="deadline-date">
+                        {% if task.deadline %}{{ task.deadline|date:'d/m/Y' }}{% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                <div class="deadline-card empty">No deadlines.</div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
 <script>
 function updateTimers() {
     const timers = document.querySelectorAll('.deadline-timer');
@@ -49,8 +58,7 @@ function updateTimers() {
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
             const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
             const minutes = Math.floor((diff / (1000 * 60)) % 60);
-            const seconds = Math.floor((diff / 1000) % 60);
-            timer.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s left`;
+            timer.textContent = days > 0 ? `in ${days} day${days!==1?'s':''}` : `${hours}h ${minutes}m left`;
         } else {
             timer.textContent = "⏰ Deadline passed";
         }

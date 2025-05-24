@@ -18,7 +18,7 @@
                 {% csrf_token %}
                 <input type="hidden" name="toggle_subtask" value="{{ subtask.id }}">
                 <input type="checkbox" onchange="this.form.submit()" {% if subtask.id in completed_subtasks %}checked{% endif %}>
-                <span onclick="showModal('{{ subtask.name|escapejs }}', '{{ subtask.description|escapejs }}')" style="cursor:pointer;text-decoration:underline;">{{ subtask.name }}</span>
+                <span onclick="showModal('{{ subtask.name|escapejs }}', '{{ subtask.description|escapejs }}')">{{ subtask.name }}</span>
             </form>
             <form method="post" action="/subtask/{{ subtask.id }}/delete/" style="display:inline;">
                 {% csrf_token %}
@@ -37,9 +37,9 @@
     <button type="submit">Додати підзавдання</button>
 </form>
 <!-- Modal for subtask description -->
-<div id="subtaskModal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4);">
-  <div style="background:#fff; margin:10vh auto; padding:20px; border-radius:8px; width:90%; max-width:400px; position:relative;">
-    <span id="closeModalBtn" style="position:absolute; right:10px; top:10px; cursor:pointer; font-size:24px;">&times;</span>
+<div id="subtaskModal">
+  <div class="modal-content">
+    <span id="closeModalBtn">&times;</span>
     <h4 id="modalTitle"></h4>
     <p id="modalDesc"></p>
   </div>
