@@ -9,3 +9,27 @@ class Group(models.Model):
 
     def __str__(self):
         return self.name
+
+class Subject(models.Model):
+    name = models.CharField(max_length=255)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='subjects')
+
+    def __str__(self):
+        return self.name
+
+class Task(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='tasks')
+    deadline = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+class Subtask(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='subtasks')
+
+    def __str__(self):
+        return self.name
