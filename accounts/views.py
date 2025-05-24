@@ -8,6 +8,7 @@ from django.shortcuts import redirect
 import json
 from .models import Group, Subject, Task, Subtask, SubtaskCompletion
 from django.urls import reverse
+from datetime import date, timedelta
 
 # Create your views here.
 
@@ -141,7 +142,51 @@ def group_detail(request, group_id):
         percent = int((completed / total) * 100) if total > 0 else 0
         group_leaderboard.append({'user': user, 'percent': percent, 'completed': completed, 'total': total})
     group_leaderboard.sort(key=lambda x: x['percent'], reverse=True)
-    context = {'group': group, 'share_link': share_link, 'deadlines': deadlines, 'group_leaderboard': group_leaderboard}
+
+    # --- Streak calculation ---
+    streak = 0
+    today = date.today()
+    group_users = list(group.users.all())
+    half_or_more = (len(group_users) + 1) // 2
+    streak_done_today = False
+    day = today
+    streak_completed_users = []
+    streak_not_completed_users = []
+    while True:
+        completions = SubtaskCompletion.objects.filter(
+            user__in=group_users,
+            subtask__in=all_subtasks,
+            completed=True,
+            created_at__date=day
+        )
+        users_done = set(completions.values_list('user_id', flat=True))
+        if day == today:
+            streak_completed_users = [user for user in group_users if user.id in users_done]
+            streak_not_completed_users = [user for user in group_users if user.id not in users_done]
+        if len(users_done) >= half_or_more:
+            if day == today:
+                streak_done_today = True
+            streak += 1
+            day = day - timedelta(days=1)
+        else:
+            if day == today:
+                streak_done_today = False
+            break
+    breadcrumbs = [
+        {'label': 'Home', 'url': '/'},
+        {'label': group.name, 'url': reverse('group_detail', args=[group.id])},
+    ]
+    context = {
+        'group': group,
+        'share_link': share_link,
+        'deadlines': deadlines,
+        'group_leaderboard': group_leaderboard,
+        'streak': streak,
+        'streak_done_today': streak_done_today,
+        'streak_completed_users': streak_completed_users,
+        'streak_not_completed_users': streak_not_completed_users,
+        'breadcrumbs': breadcrumbs,
+    }
     if request.method == 'POST' and 'leave' in request.POST:
         group.users.remove(request.user)
         return redirect('home')
@@ -188,6 +233,7 @@ def subject_detail(request, subject_id):
         if name:
             Task.objects.create(name=name, description=description, deadline=deadline, subject=subject)
     tasks = subject.tasks.all()
+    subject_deadlines = tasks.order_by('deadline')
     # Subject leaderboard: % of completed subtasks for all users in the group for this subject
     all_subtasks = Subtask.objects.filter(task__subject=subject)
     subject_leaderboard = []
@@ -197,7 +243,12 @@ def subject_detail(request, subject_id):
         percent = int((completed / total) * 100) if total > 0 else 0
         subject_leaderboard.append({'user': user, 'percent': percent, 'completed': completed, 'total': total})
     subject_leaderboard.sort(key=lambda x: x['percent'], reverse=True)
-    return render(request, 'subject_detail.html', {'subject': subject, 'tasks': tasks, 'subject_leaderboard': subject_leaderboard})
+    breadcrumbs = [
+        {'label': 'Home', 'url': '/'},
+        {'label': group.name, 'url': reverse('group_detail', args=[group.id])},
+        {'label': subject.name, 'url': reverse('subject_detail', args=[subject.id])},
+    ]
+    return render(request, 'subject_detail.html', {'subject': subject, 'tasks': tasks, 'subject_leaderboard': subject_leaderboard, 'subject_deadlines': subject_deadlines, 'breadcrumbs': breadcrumbs})
 
 @login_required
 def delete_task(request, task_id):
@@ -238,7 +289,13 @@ def task_detail(request, task_id):
     leaderboard.sort(key=lambda x: x['percent'], reverse=True)
     # For current user: set of completed subtask ids
     completed_subtasks = set(SubtaskCompletion.objects.filter(user=request.user, subtask__in=subtasks).values_list('subtask_id', flat=True))
-    return render(request, 'task_detail.html', {'task': task, 'subtasks': subtasks, 'leaderboard': leaderboard, 'completed_subtasks': completed_subtasks})
+    breadcrumbs = [
+        {'label': 'Home', 'url': '/'},
+        {'label': group.name, 'url': reverse('group_detail', args=[group.id])},
+        {'label': subject.name, 'url': reverse('subject_detail', args=[subject.id])},
+        {'label': task.name, 'url': reverse('task_detail', args=[task.id])},
+    ]
+    return render(request, 'task_detail.html', {'task': task, 'subtasks': subtasks, 'leaderboard': leaderboard, 'completed_subtasks': completed_subtasks, 'breadcrumbs': breadcrumbs})
 
 @login_required
 def delete_subtask(request, subtask_id):

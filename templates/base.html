@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}App{% endblock %}</title>
+</head>
+<body>
+    <header style="background:#f5f5f5;padding:10px 20px;">
+        <nav style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+                {% if breadcrumbs %}
+                    {% for crumb in breadcrumbs %}
+                        {% if not forloop.last %}
+                            <a href="{{ crumb.url }}">{{ crumb.label }}</a> &gt; 
+                        {% else %}
+                            <span>{{ crumb.label }}</span>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <div>
+                {% if request.user.is_authenticated %}
+                    <span>{{ request.user.username }}</span> |
+                    <form method="post" action="/logout/" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="/signin/">Login</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+    <main style="padding:20px;">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html> 
