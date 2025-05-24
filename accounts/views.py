@@ -9,6 +9,7 @@ import json
 from .models import Group, Subject, Task, Subtask, SubtaskCompletion
 from django.urls import reverse
 from datetime import date, timedelta
+import math
 
 # Create your views here.
 
@@ -134,13 +135,20 @@ def group_detail(request, group_id):
     share_link = request.build_absolute_uri(reverse('group_join', args=[group.share_uuid]))
     deadlines = Task.objects.filter(subject__group=group).order_by('deadline')
     # Group leaderboard: % of completed subtasks for all users in the group
-    all_subtasks = Subtask.objects.filter(task__subject__group=group)
+    all_subtasks = Task.objects.filter(subject__group=group).values_list('subtasks', flat=True)
+    all_subtasks = [subtask for subtask in all_subtasks if subtask is not None]
+    total = SubtaskCompletion.objects.filter(subtask__in=all_subtasks).count() # Total possible completions across all users and subtasks
+
     group_leaderboard = []
-    total = all_subtasks.count()
     for user in group.users.all():
-        completed = SubtaskCompletion.objects.filter(user=user, subtask__in=all_subtasks).count()
-        percent = int((completed / total) * 100) if total > 0 else 0
-        group_leaderboard.append({'user': user, 'percent': percent, 'completed': completed, 'total': total})
+        # Calculate user's completed subtasks within this group's tasks
+        user_completed_subtasks = SubtaskCompletion.objects.filter(user=user, subtask__in=all_subtasks).count()
+        # Calculate the total number of subtasks in the group for percentage calculation
+        total_group_subtasks = Subtask.objects.filter(task__subject__group=group).count()
+        
+        percent = int((user_completed_subtasks / total_group_subtasks) * 100) if total_group_subtasks > 0 else 0
+        green_bars = math.ceil(percent / 5)
+        group_leaderboard.append({'user': user, 'percent': percent, 'completed': user_completed_subtasks, 'total': total_group_subtasks, 'green_bars': green_bars})
     group_leaderboard.sort(key=lambda x: x['percent'], reverse=True)
 
     # --- Streak calculation ---
@@ -186,6 +194,7 @@ def group_detail(request, group_id):
         'streak_completed_users': streak_completed_users,
         'streak_not_completed_users': streak_not_completed_users,
         'breadcrumbs': breadcrumbs,
+        'range_20': range(1, 21),
     }
     if request.method == 'POST' and 'leave' in request.POST:
         group.users.remove(request.user)

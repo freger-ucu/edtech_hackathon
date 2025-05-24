@@ -1,23 +1,18 @@
 {% extends 'base.html' %}
+{% block title %}Sign up{% endblock %}
 {% block hide_header %}True{% endblock %}
-{% block title %}Register{% endblock %}
 {% block content %}
-<div class="centered-form">
-<h2>Register</h2>
-{% if error %}<p class="error">{{ error }}</p>{% endif %}
-{% if success %}<p class="success">{{ success }}</p>{% endif %}
-<form method="post">
-    {% csrf_token %}
-    <label>Username:</label>
-    <input type="text" name="username">
-    <label>Email:</label>
-    <input type="email" name="email">
-    <label>Password:</label>
-    <input type="password" name="password">
-    <label>Repeat password:</label>
-    <input type="password" name="password2">
-    <button type="submit">Create account</button>
-</form>
-<p>Already registered? <a href="/signin/">Sign in</a></p>
-</div>
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create account</button>
+    </form>
+    <p>Already registered? <a href="/signin/">Sign in</a></p>
 {% endblock %} 

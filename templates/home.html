@@ -3,15 +3,6 @@
 {% block content %}
 <div class="main-layout">
     <aside class="sidebar">
-        <div class="sidebar-logo">
-            <span style="font-family:'Press Start 2P',monospace;font-size:1.3em;color:#fff;display:flex;align-items:center;gap:10px;">
-                <span style="font-size:2em;vertical-align:middle;">🟪</span> PLIDNO
-            </span>
-        </div>
-        <form method="post" action="/logout/" style="margin-bottom:24px;">
-            {% csrf_token %}
-            <button type="submit" class="sidebar-btn logout-btn">Logout</button>
-        </form>
         <button class="sidebar-btn join-btn">Join community</button>
         <button class="sidebar-btn create-btn">Create community</button>
         <div class="sidebar-section">
@@ -27,7 +18,7 @@
         <h2 class="deadlines-title">Your deadlines</h2>
         <div class="deadlines-list">
             {% for task in tasks %}
-                <div class="deadline-card">
+                <a href="/task/{{ task.id }}/" class="deadline-card" style="text-decoration:none;">
                     <div class="deadline-path">{{ task.subject.group.name }} &gt; {{ task.subject.name }}</div>
                     <div class="deadline-title">{{ task.name }}</div>
                     <div class="deadline-when">
@@ -40,7 +31,7 @@
                     <div class="deadline-date">
                         {% if task.deadline %}{{ task.deadline|date:'d/m/Y' }}{% endif %}
                     </div>
-                </div>
+                </a>
             {% empty %}
                 <div class="deadline-card empty">No deadlines.</div>
             {% endfor %}
