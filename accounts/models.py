@@ -33,3 +33,11 @@ class Subtask(models.Model):
 
     def __str__(self):
         return self.name
+
+class SubtaskCompletion(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    subtask = models.ForeignKey(Subtask, on_delete=models.CASCADE)
+    completed = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ('user', 'subtask')
