@@ -2,17 +2,18 @@
 {% block hide_header %}True{% endblock %}
 {% block title %}Sign in{% endblock %}
 {% block content %}
-    {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Sign in</button>
-    </form>
-    <p>Don't have an account? <a href="/signup/">Sign up</a></p>
+<div class="centered-form">
+<h2>Sign in</h2>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+{% if success %}<p class="success">{{ success }}</p>{% endif %}
+<form method="post">
+    {% csrf_token %}
+    <label>Email:</label>
+    <input type="email" name="email">
+    <label>Password:</label>
+    <input type="password" name="password">
+    <button type="submit">Sign in</button>
+</form>
+<p>Don't have an account? <a href="/signup/">Register</a></p>
+</div>
 {% endblock %} 
