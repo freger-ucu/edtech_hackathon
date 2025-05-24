@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group detail</title>
+</head>
+<body>
+    <h2>Group: {{ group.name }}</h2>
+    <a href="/">← На головну</a>
+    <p>Share link: <input type="text" value="{{ share_link }}" id="shareLink" readonly>
+    <button onclick="copyLink()">Copy share link</button></p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="leave">Вийти з групи</button>
+    </form>
+    <script>
+    function copyLink() {
+        var copyText = document.getElementById("shareLink");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        alert("Link copied: " + copyText.value);
+    }
+    </script>
+</body>
+</html> 
