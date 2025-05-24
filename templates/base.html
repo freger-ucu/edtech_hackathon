@@ -187,6 +187,8 @@
         cursor: pointer;
         transition: background 0.2s, color 0.2s;
         box-shadow: 0 2px 8px #0002;
+        display: block;
+        text-align: center;
     }
     .sidebar-btn.join-btn {
         background: #fff;
@@ -360,7 +362,9 @@
     <header>
         <nav>
             <div class="header-logo">
-                <img src="/static/logo.png" alt="PLIDNO logo" /> PLIDNO
+                <a href="{% url 'home' %}" style="text-decoration: none; color: inherit;">
+                    <img src="/static/logo.png" alt="PLIDNO logo" /> PLIDNO
+                </a>
             </div>
             <div>
                 {% if breadcrumbs %}

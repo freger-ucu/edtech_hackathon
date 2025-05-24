@@ -4,7 +4,7 @@
 <div class="main-layout">
     <aside class="sidebar">
         <button class="sidebar-btn join-btn">Join community</button>
-        <button class="sidebar-btn create-btn">Create community</button>
+        <a href="{% url 'create_group' %}" class="sidebar-btn create-btn" style="text-decoration: none; color: inherit; width: 100%;">Create community</a>
         <div class="sidebar-section">
             <div class="sidebar-title">Your communities</div>
             {% for group in groups %}

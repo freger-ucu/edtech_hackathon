@@ -171,6 +171,8 @@ def group_detail(request, group_id):
         if day == today:
             streak_completed_users = [user for user in group_users if user.id in users_done]
             streak_not_completed_users = [user for user in group_users if user.id not in users_done]
+            # Calculate how many more are needed for the streak today
+            needed_for_streak = max(0, half_or_more - len(users_done))
         if len(users_done) >= half_or_more:
             if day == today:
                 streak_done_today = True
@@ -193,6 +195,7 @@ def group_detail(request, group_id):
         'streak_done_today': streak_done_today,
         'streak_completed_users': streak_completed_users,
         'streak_not_completed_users': streak_not_completed_users,
+        'needed_for_streak': needed_for_streak,
         'breadcrumbs': breadcrumbs,
         'range_20': range(1, 21),
     }
@@ -272,6 +275,28 @@ def subject_detail(request, subject_id):
         'range_20': range(1, 21),
     }
     return render(request, 'subject_detail.html', context)
+
+@login_required
+def create_task_for_subject(request, subject_id):
+    subject = Subject.objects.get(id=subject_id)
+    group = subject.group
+    if request.user not in group.users.all():
+        return redirect('home')
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description') # Assuming description is optional
+        deadline_str = request.POST.get('deadline')
+        deadline = None
+        if deadline_str:
+            from datetime import datetime
+            # Assuming deadline_str is in a format that datetime-local provides (YYYY-MM-DDTHH:MM)
+            deadline = datetime.fromisoformat(deadline_str)
+
+        if name:
+            Task.objects.create(name=name, description=description, deadline=deadline, subject=subject)
+
+    return redirect('subject_detail', subject_id=subject.id) # Redirect back to subject detail
 
 @login_required
 def delete_task(request, task_id):
@@ -359,6 +384,8 @@ def task_detail(request, task_id):
         if day == today:
             streak_completed_users = [user for user in group_users if user.id in users_done]
             streak_not_completed_users = [user for user in group_users if user.id not in users_done]
+            # Calculate how many more are needed for the streak today
+            needed_for_streak = max(0, half_or_more - len(users_done))
         if len(users_done) >= half_or_more:
             if day == today:
                 streak_done_today = True
@@ -387,6 +414,7 @@ def task_detail(request, task_id):
         'streak': streak, # Pass streak info to template
         'streak_done_today': streak_done_today,
         'streak_not_completed_users': streak_not_completed_users,
+        'needed_for_streak': needed_for_streak, # Pass the new variable to the template
     }
 
     return render(request, 'task_detail.html', context)

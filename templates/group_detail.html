@@ -4,7 +4,7 @@
 <div class="main-layout">
     <!-- Sidebar -->
     <aside class="sidebar">
-        <h2 style="font-size:2em;text-align:left;margin-bottom:24px;font-family:'Press Start 2P',monospace;">{{ group.name }}</h2>
+        <h3 style="font-size:1.8em;text-align:left;margin-bottom:24px;font-family:'Press Start 2P',monospace;">{{ group.name }}</h3>
         <div class="sidebar-section">
             <div class="sidebar-title">Subjects</div>
             {% for subject in group.subjects.all %}
@@ -25,12 +25,27 @@
                     <span style="color:#bdbdbd;">Streak not active</span>
                 </div>
                 <div style="color:#bdbdbd;font-size:0.95em;margin:0 0 12px 22px;">
-                    {{ streak_not_completed_users|length }} more people have to commit to the streak today
+                    {{ needed_for_streak }} more people have to commit to the streak today
                 </div>
             {% endif %}
-            <button class="sidebar-btn" onclick="navigator.clipboard.writeText('{{ share_link }}')">Copy share link</button>
-            <button class="sidebar-btn" style="background:#fff;color:#23262b;">Edit community</button>
+            <button class="sidebar-btn" onclick="copyLinkAndShowMessage('{{ share_link }}')">Copy share link</button>
+            <span id="copy-confirm-message" style="color:#7fff5a; font-size:0.9em; margin-left: 10px;"></span>
         </div>
+         {% comment %}
+             <div class="sidebar-section">
+                 <button class="sidebar-btn" style="background:#fff;color:#23262b;">Edit community</button>
+             </div>
+         {% endcomment %}
+
+        <div class="sidebar-section" style="margin-top:20px;">
+             <div class="sidebar-title">Add New Subject</div>
+             <form method="post" action="{% url 'create_subject' group.id %}" style="display:flex; flex-direction:column; gap: 10px;">
+                 {% csrf_token %}
+                 <input type="text" name="name" placeholder="Subject name" style="margin-bottom:0;" required>
+                 <button class="sidebar-btn" type="submit" style="background:#b266ff;color:#fff;font-weight:bold; margin-top: 0;">Add Subject</button>
+             </form>
+         </div>
+
     </aside>
     <!-- Deadlines -->
     <section class="deadlines-section">
@@ -97,5 +112,18 @@ function updateTimers() {
 }
 setInterval(updateTimers, 1000);
 updateTimers();
+
+function copyLinkAndShowMessage(link) {
+    navigator.clipboard.writeText(link).then(function() {
+        const messageSpan = document.getElementById('copy-confirm-message');
+        messageSpan.textContent = 'Copied!';
+        setTimeout(function() {
+            messageSpan.textContent = '';
+        }, 3000); // Clear message after 3 seconds
+    }, function(err) {
+        console.error('Could not copy text: ', err);
+        // Optionally show an error message
+    });
+}
 </script>
 {% endblock %} 

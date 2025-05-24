@@ -13,6 +13,7 @@ urlpatterns = [
     path('group/<int:group_id>/create_subject/', views.create_subject, name='create_subject'),
     path('subject/<int:subject_id>/delete/', views.delete_subject, name='delete_subject'),
     path('subject/<int:subject_id>/', views.subject_detail, name='subject_detail'),
+    path('subject/<int:subject_id>/create_task/', views.create_task_for_subject, name='create_task_for_subject'),
     path('task/<int:task_id>/delete/', views.delete_task, name='delete_task'),
     path('task/<int:task_id>/', views.task_detail, name='task_detail'),
     path('subtask/<int:subtask_id>/delete/', views.delete_subtask, name='delete_subtask'),

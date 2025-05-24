@@ -4,7 +4,7 @@
 <div class="main-layout">
     <!-- Sidebar -->
     <aside class="sidebar">
-        {% comment %} Task name is in breadcrumbs {% endcomment %}
+        <h3 style="font-size:1.8em;text-align:left;margin-bottom:24px;font-family:'Press Start 2P',monospace;">{{ task.name }}</h3>
         <div class="sidebar-section">
             <div class="sidebar-title">Deadline</div>
             {% if task.deadline %}
@@ -36,7 +36,7 @@
                     <span style="color:#bdbdbd;">Streak not active</span>
                 </div>
                 <div style="color:#bdbdbd;font-size:0.95em;margin:0 0 12px 22px;">
-                    {{ streak_not_completed_users|length }} more people have to commit to the streak today
+                    {{ needed_for_streak }} more people have to commit to the streak today
                 </div>
             {% endif %}
         </div>
@@ -60,7 +60,7 @@
                          <input type="hidden" name="toggle_subtask" value="{{ subtask.id }}">
                      </form>
                     <span style="flex:1; font-size: 1.05em;">{{ subtask.name }}</span>
-                    <form method="post" style="flex-shrink: 0;">
+                    <form method="post" action="{% url 'delete_subtask' subtask.id %}" style="flex-shrink: 0;">
                         {% csrf_token %}
                         <button type="submit" name="delete_subtask" value="{{ subtask.id }}" style="width: 30px; height: 30px; padding: 0; margin: 0; background:#ff4d4d; color:#fff; border: none; border-radius: 4px; font-size: 1.1em; display: flex; align-items: center; justify-content: center; cursor: pointer;">🗑️</button>
                     </form>
