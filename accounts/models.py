@@ -19,7 +19,7 @@ class Subject(models.Model):
 
 class Task(models.Model):
     name = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, null=True)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='tasks')
     deadline = models.DateTimeField(null=True, blank=True)
 
@@ -28,7 +28,7 @@ class Task(models.Model):
 
 class Subtask(models.Model):
     name = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, null=True)
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='subtasks')
 
     def __str__(self):

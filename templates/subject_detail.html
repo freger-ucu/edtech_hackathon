@@ -1,51 +1,74 @@
 {% extends 'base.html' %}
-{% block title %}Subject: {{ subject.name }}{% endblock %}
+{% block title %}{{ subject.name }}{% endblock %}
 {% block content %}
-<h2>Subject: {{ subject.name }}</h2>
-<a href="/group/{{ subject.group.id }}/">← До групи</a>
-<h3>Лідерборд предмета:</h3>
-<ul>
-    {% for entry in subject_leaderboard %}
-        <li>{{ entry.user.username }}: {{ entry.percent }}% ({{ entry.completed }}/{{ entry.total }})</li>
-    {% endfor %}
-</ul>
-<h3>Дедлайни предмета:</h3>
-<ul>
-    {% for task in subject_deadlines %}
-        <li>
-            <a href="/task/{{ task.id }}/">{{ task.name }}</a>
-            — {% if task.deadline %}
-                <span class="deadline-timer" data-deadline="{{ task.deadline|date:'c' }}"></span>
-            {% else %}
-                без дедлайну
-            {% endif %}
-        </li>
-    {% empty %}
-        <li>Немає дедлайнів.</li>
-    {% endfor %}
-</ul>
-<h3>Tasks:</h3>
-<ul>
-    {% for task in tasks %}
-        <li>
-            <a href="/task/{{ task.id }}//">{{ task.name }}</a>
-            <form method="post" action="/task/{{ task.id }}/delete/" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit">Видалити</button>
-            </form>
-        </li>
-    {% empty %}
-        <li>No tasks yet.</li>
-    {% endfor %}
-</ul>
-<form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="create_task" value="1">
-    <input type="text" name="name" placeholder="Task name">
-    <input type="text" name="description" placeholder="Description">
-    <input type="datetime-local" name="deadline" placeholder="Deadline">
-    <button type="submit">Додати завдання</button>
-</form>
+<div class="main-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h3 style="font-size:1.8em;text-align:left;margin-bottom:24px;font-family:'Press Start 2P',monospace;">{{ subject.name }}</h3>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Tasks</div>
+            {% for task in tasks %}
+                <a href="/task/{{ task.id }}/" class="sidebar-group">{{ task.name }}</a>
+            {% empty %}
+                <div class="sidebar-group empty">No tasks yet.</div>
+            {% endfor %}
+        </div>
+        <div class="sidebar-section" style="margin-top:20px;">
+             <div class="sidebar-title">Add New Deadline</div>
+             <form method="post" action="{% url 'create_task_for_subject' subject.id %}" style="display:flex; flex-direction:column; gap: 10px;">
+                 {% csrf_token %}
+                 <input type="text" name="name" placeholder="Task name" style="margin-bottom:0;" required>
+                 <input type="datetime-local" name="deadline" required>
+                 <button class="sidebar-btn" type="submit" style="background:#b266ff;color:#fff;font-weight:bold; margin-top: 0;">Add Task</button>
+             </form>
+         </div>
+    </aside>
+    <!-- Deadlines -->
+    <section class="deadlines-section">
+        <h2 class="deadlines-title">Deadlines</h2>
+        <div class="deadlines-list">
+            {% for task in tasks_with_deadlines %}
+                <a href="/task/{{ task.id }}/" class="deadline-card" style="text-decoration:none;">
+                    <div class="deadline-path">{{ subject.group.name }} &gt; {{ subject.name }}</div>
+                    <div class="deadline-title">{{ task.name }}</div>
+                    <div class="deadline-when">
+                        {% if task.deadline %}
+                            <span class="deadline-timer" data-deadline="{{ task.deadline|date:'c' }}"></span>
+                        {% else %}
+                            No deadline
+                        {% endif %}
+                    </div>
+                    <div class="deadline-date">
+                        {% if task.deadline %}{{ task.deadline|date:'d/m/Y' }}{% endif %}
+                    </div>
+                </a>
+            {% empty %}
+                <div class="deadline-card empty">No deadlines.</div>
+            {% endfor %}
+        </div>
+    </section>
+    <!-- Leaderboard -->
+     <section class="deadlines-section" style="max-width:320px;">
+        <h2 class="deadlines-title">Leaderboard</h2>
+         <div class="deadlines-list">
+            {% for entry in subject_leaderboard %}
+                <div class="deadline-card" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px 12px 18px 12px;">
+                    <span style="font-size:1.2em;margin-bottom:8px;">{{ entry.user.username }}</span>
+                    <div style="width:100%;display:flex;align-items:center;justify-content:center;gap:2px;margin-bottom:8px;">
+                        {% for i in range_20 %}
+                            {% if forloop.counter <= entry.green_bars %}
+                                <span style="display:inline-block;width:14px;height:18px;border-radius:3px;background:#7fff5a;margin:0 1px;"></span>
+                            {% else %}
+                                <span style="display:inline-block;width:14px;height:18px;border-radius:3px;background:#444;margin:0 1px;"></span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <span style="font-size:1.1em;">{{ entry.percent }}%</span>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
 <script>
 function updateTimers() {
     const timers = document.querySelectorAll('.deadline-timer');
@@ -57,8 +80,7 @@ function updateTimers() {
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
             const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
             const minutes = Math.floor((diff / (1000 * 60)) % 60);
-            const seconds = Math.floor((diff / 1000) % 60);
-            timer.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s left`;
+            timer.textContent = days > 0 ? `in ${days} day${days!==1?'s':''}` : `${hours}h ${minutes}m left`;
         } else {
             timer.textContent = "⏰ Deadline passed";
         }
