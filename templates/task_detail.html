@@ -1,61 +1,108 @@
 {% extends 'base.html' %}
-{% block title %}Task: {{ task.name }}{% endblock %}
+{% block title %}{{ task.name }}{% endblock %}
 {% block content %}
-<h2>Task: {{ task.name }}</h2>
-<a href="/subject/{{ task.subject.id }}/">← До предмета</a>
-<p>{{ task.description }}</p>
-<h3>Leaderboard:</h3>
-<ul>
-    {% for entry in leaderboard %}
-        <li>{{ entry.user.username }}: {{ entry.percent }}% ({{ entry.completed }}/{{ entry.total }})</li>
-    {% endfor %}
-</ul>
-<h3>Subtasks:</h3>
-<ul>
-    {% for subtask in subtasks %}
-        <li>
-            <form method="post" style="display:inline;">
-                {% csrf_token %}
-                <input type="hidden" name="toggle_subtask" value="{{ subtask.id }}">
-                <input type="checkbox" onchange="this.form.submit()" {% if subtask.id in completed_subtasks %}checked{% endif %}>
-                <span onclick="showModal('{{ subtask.name|escapejs }}', '{{ subtask.description|escapejs }}')">{{ subtask.name }}</span>
-            </form>
-            <form method="post" action="/subtask/{{ subtask.id }}/delete/" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit">Видалити</button>
-            </form>
-        </li>
-    {% empty %}
-        <li>No subtasks yet.</li>
-    {% endfor %}
-</ul>
-<form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="create_subtask" value="1">
-    <input type="text" name="name" placeholder="Subtask name">
-    <input type="text" name="description" placeholder="Description">
-    <button type="submit">Додати підзавдання</button>
-</form>
-<!-- Modal for subtask description -->
-<div id="subtaskModal">
-  <div class="modal-content">
-    <span id="closeModalBtn">&times;</span>
-    <h4 id="modalTitle"></h4>
-    <p id="modalDesc"></p>
-  </div>
+<div class="main-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        {% comment %} Task name is in breadcrumbs {% endcomment %}
+        <div class="sidebar-section">
+            <div class="sidebar-title">Deadline</div>
+            {% if task.deadline %}
+                <div style="color:#b266ff;font-size:1.1em;margin-bottom:10px;font-family:'Fira Mono', monospace;">{{ task.deadline|date:'d/m/Y H:i' }}</div>
+                 <form method="post" style="margin-bottom:10px;">
+                    {% csrf_token %}
+                    <input type="datetime-local" name="deadline" value="{{ task.deadline|date:"Y-m-d\\TH:i" }}">
+                    <button type="submit" name="change_deadline" style="margin-top:10px;" class="sidebar-btn">Change date</button>
+                </form>
+            {% else %}
+                 <div style="color:#bdbdbd;font-size:1.1em;margin-bottom:10px;font-family:'Fira Mono', monospace;">No deadline set.</div>
+                  <form method="post" style="margin-bottom:10px;">
+                    {% csrf_token %}
+                    <input type="datetime-local" name="deadline">
+                    <button type="submit" name="set_deadline" style="margin-top:10px;" class="sidebar-btn">Set deadline</button>
+                </form>
+            {% endif %}
+        </div>
+        {% if streak is not None %}
+        <div class="sidebar-section">
+             {% if streak_done_today %}
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                    <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#7fff5a;"></span>
+                    <span style="color:#7fff5a;font-weight:bold;">Streak active today</span>
+                </div>
+            {% else %}
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                    <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#888;"></span>
+                    <span style="color:#bdbdbd;">Streak not active</span>
+                </div>
+                <div style="color:#bdbdbd;font-size:0.95em;margin:0 0 12px 22px;">
+                    {{ streak_not_completed_users|length }} more people have to commit to the streak today
+                </div>
+            {% endif %}
+        </div>
+         {% endif %}
+         <div class="sidebar-section">
+             <form method="post">
+                 {% csrf_token %}
+                 <button class="sidebar-btn" type="submit" name="delete_task" style="background:#ff4d4d;color:#fff;font-weight:bold;">Delete task</button>
+             </form>
+         </div>
+    </aside>
+    <!-- Subtasks -->
+    <section class="deadlines-section">
+        <h2 class="deadlines-title">Tasks to do</h2>
+        <div class="deadlines-list">
+            {% for subtask in subtasks %}
+                 <div class="deadline-card" style="display:flex; flex-direction: row; align-items:center; gap:16px; padding:14px 18px;">
+                    <input type="checkbox" onclick="event.preventDefault(); document.getElementById('toggle-{{ subtask.id }}').submit();" {% if subtask.id in completed_subtasks %}checked{% endif %} style="flex-shrink: 0; width: 20px; height: 20px;">
+                     <form method="post" id="toggle-{{ subtask.id }}" style="display:none;">
+                         {% csrf_token %}
+                         <input type="hidden" name="toggle_subtask" value="{{ subtask.id }}">
+                     </form>
+                    <span style="flex:1; font-size: 1.05em;">{{ subtask.name }}</span>
+                    <form method="post" style="flex-shrink: 0;">
+                        {% csrf_token %}
+                        <button type="submit" name="delete_subtask" value="{{ subtask.id }}" style="width: 30px; height: 30px; padding: 0; margin: 0; background:#ff4d4d; color:#fff; border: none; border-radius: 4px; font-size: 1.1em; display: flex; align-items: center; justify-content: center; cursor: pointer;">🗑️</button>
+                    </form>
+                 </div>
+            {% empty %}
+                <div class="deadline-card empty">No subtasks yet.</div>
+            {% endfor %}
+        </div>
+        <div class="sidebar-section" style="margin-top:20px;">
+             <form method="post">
+                 {% csrf_token %}
+                 <input type="hidden" name="create_subtask" value="1">
+                 <input type="text" name="name" placeholder="New subtask name" style="margin-bottom:10px;">
+                 <button class="sidebar-btn" type="submit" style="background:#b266ff;color:#fff;font-weight:bold;">Add subtask</button>
+             </form>
+         </div>
+    </section>
+    <!-- Leaderboard -->
+     <section class="deadlines-section" style="max-width:320px;">
+        <h2 class="deadlines-title">Leaderboard</h2>
+         <div class="deadlines-list">
+            {% for entry in leaderboard %}
+                <div class="deadline-card" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px 12px 18px 12px;">
+                    <span style="font-size:1.2em;margin-bottom:8px;">{{ entry.user.username }}</span>
+                    <div style="width:100%;display:flex;align-items:center;justify-content:center;gap:2px;margin-bottom:8px;">
+                        {% for i in range_20 %}
+                            {% if forloop.counter <= entry.green_bars %}
+                                <span style="display:inline-block;width:14px;height:18px;border-radius:3px;background:#7fff5a;margin:0 1px;"></span>
+                            {% else %}
+                                <span style="display:inline-block;width:14px;height:18px;border-radius:3px;background:#444;margin:0 1px;"></span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <span style="font-size:1.1em;">{{ entry.percent }}%</span>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
 </div>
+{% comment %}
 <script>
-function showModal(title, desc) {
-    document.getElementById('modalTitle').innerText = title;
-    document.getElementById('modalDesc').innerText = desc;
-    document.getElementById('subtaskModal').style.display = 'block';
-}
-document.getElementById('closeModalBtn').onclick = function() {
-    document.getElementById('subtaskModal').style.display = 'none';
-};
-window.onclick = function(event) {
-    var modal = document.getElementById('subtaskModal');
-    if (event.target == modal) { modal.style.display = 'none'; }
-}
+    // Timer script is in base.html now
 </script>
+{% endcomment %}
 {% endblock %} 
