@@ -1,64 +1,100 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Group detail</title>
-</head>
-<body>
-    <h2>Group: {{ group.name }}</h2>
-    <a href="/">← На головну</a>
-    <p>Share link: <input type="text" value="{{ share_link }}" id="shareLink" readonly>
-    <button onclick="copyLink()">Copy share link</button></p>
-    <h3>Subjects:</h3>
-    <ul>
-        {% for subject in group.subjects.all %}
-            <li>
-                <a href="/subject/{{ subject.id }}/">{{ subject.name }}</a>
-                <form method="post" action="/subject/{{ subject.id }}/delete/" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit">Видалити</button>
-                </form>
-            </li>
-        {% empty %}
-            <li>No subjects yet.</li>
-        {% endfor %}
-    </ul>
-    <form method="post" action="/group/{{ group.id }}/create_subject/">
-        {% csrf_token %}
-        <input type="text" name="name" placeholder="Subject name">
-        <button type="submit">Додати предмет</button>
-    </form>
-    <h3>Груповий лідерборд:</h3>
-    <ul>
-        {% for entry in group_leaderboard %}
-            <li>{{ entry.user.username }}: {{ entry.percent }}% ({{ entry.completed }}/{{ entry.total }})</li>
-        {% endfor %}
-    </ul>
-    <h3>Дедлайни групи:</h3>
-    <ul>
-        {% for task in deadlines %}
-            <li>
-                <a href="/task/{{ task.id }}/">{{ task.name }}</a>
-                ({{ task.subject.name }}) —
-                {% if task.deadline %}{{ task.deadline|date:'Y-m-d H:i' }}{% else %}без дедлайну{% endif %}
-            </li>
-        {% empty %}
-            <li>Немає дедлайнів.</li>
-        {% endfor %}
-    </ul>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="leave">Вийти з групи</button>
-    </form>
-    <script>
-    function copyLink() {
-        var copyText = document.getElementById("shareLink");
-        copyText.select();
-        copyText.setSelectionRange(0, 99999);
-        document.execCommand("copy");
-        alert("Link copied: " + copyText.value);
-    }
-    </script>
-</body>
-</html> 
+{% extends 'base.html' %}
+{% block title %}Group: {{ group.name }}{% endblock %}
+{% block content %}
+<h2>Group: {{ group.name }}</h2>
+<a href="/">← На головну</a>
+<p>Share link: <input type="text" value="{{ share_link }}" id="shareLink" readonly>
+<button onclick="copyLink()">Copy share link</button></p>
+<h3>Streak:</h3>
+<p>Current streak: {{ streak }}</p>
+<p>Today's streak: {% if streak_done_today %}<span style="color:green">Completed ✅</span>{% else %}<span style="color:red">Not completed ❌</span>{% endif %}</p>
+<h4>Who completed today:</h4>
+<ul>
+    {% for user in streak_completed_users %}
+        <li style="color:green">{{ user.username }}</li>
+    {% empty %}
+        <li>Ніхто не виконав підзавдання сьогодні.</li>
+    {% endfor %}
+</ul>
+<h4>Who didn't complete today:</h4>
+<ul>
+    {% for user in streak_not_completed_users %}
+        <li style="color:red">{{ user.username }}</li>
+    {% empty %}
+        <li>Всі виконали підзавдання сьогодні!</li>
+    {% endfor %}
+</ul>
+<h3>Subjects:</h3>
+<ul>
+    {% for subject in group.subjects.all %}
+        <li>
+            <a href="/subject/{{ subject.id }}/">{{ subject.name }}</a>
+            <form method="post" action="/subject/{{ subject.id }}/delete/" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit">Видалити</button>
+            </form>
+        </li>
+    {% empty %}
+        <li>No subjects yet.</li>
+    {% endfor %}
+</ul>
+<form method="post" action="/group/{{ group.id }}/create_subject/">
+    {% csrf_token %}
+    <input type="text" name="name" placeholder="Subject name">
+    <button type="submit">Додати предмет</button>
+</form>
+<h3>Груповий лідерборд:</h3>
+<ul>
+    {% for entry in group_leaderboard %}
+        <li>{{ entry.user.username }}: {{ entry.percent }}% ({{ entry.completed }}/{{ entry.total }})</li>
+    {% endfor %}
+</ul>
+<h3>Дедлайни групи:</h3>
+<ul>
+    {% for task in deadlines %}
+        <li>
+            <a href="/task/{{ task.id }}/">{{ task.name }}</a>
+            ({{ task.subject.name }}) —
+            {% if task.deadline %}
+                <span class="deadline-timer" data-deadline="{{ task.deadline|date:'c' }}"></span>
+            {% else %}
+                без дедлайну
+            {% endif %}
+        </li>
+    {% empty %}
+        <li>Немає дедлайнів.</li>
+    {% endfor %}
+</ul>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" name="leave">Вийти з групи</button>
+</form>
+<script>
+function copyLink() {
+    var copyText = document.getElementById("shareLink");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+    alert("Link copied: " + copyText.value);
+}
+function updateTimers() {
+    const timers = document.querySelectorAll('.deadline-timer');
+    timers.forEach(function(timer) {
+        const deadline = new Date(timer.getAttribute('data-deadline'));
+        const now = new Date();
+        const diff = deadline - now;
+        if (diff > 0) {
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / (1000 * 60)) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+            timer.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s left`;
+        } else {
+            timer.textContent = "⏰ Deadline passed";
+        }
+    });
+}
+setInterval(updateTimers, 1000);
+updateTimers();
+</script>
+{% endblock %} 

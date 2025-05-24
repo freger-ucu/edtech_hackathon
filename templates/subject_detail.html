@@ -1,40 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subject detail</title>
-</head>
-<body>
-    <h2>Subject: {{ subject.name }}</h2>
-    <a href="/group/{{ subject.group.id }}/">← До групи</a>
-    <h3>Лідерборд предмета:</h3>
-    <ul>
-        {% for entry in subject_leaderboard %}
-            <li>{{ entry.user.username }}: {{ entry.percent }}% ({{ entry.completed }}/{{ entry.total }})</li>
-        {% endfor %}
-    </ul>
-    <h3>Tasks:</h3>
-    <ul>
-        {% for task in tasks %}
-            <li>
-                <a href="/task/{{ task.id }}/">{{ task.name }}</a>
-                <form method="post" action="/task/{{ task.id }}/delete/" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit">Видалити</button>
-                </form>
-            </li>
-        {% empty %}
-            <li>No tasks yet.</li>
-        {% endfor %}
-    </ul>
-    <form method="post">
-        {% csrf_token %}
-        <input type="hidden" name="create_task" value="1">
-        <input type="text" name="name" placeholder="Task name">
-        <input type="text" name="description" placeholder="Description">
-        <input type="datetime-local" name="deadline" placeholder="Deadline">
-        <button type="submit">Додати завдання</button>
-    </form>
-</body>
-</html> 
+{% extends 'base.html' %}
+{% block title %}Subject: {{ subject.name }}{% endblock %}
+{% block content %}
+<h2>Subject: {{ subject.name }}</h2>
+<a href="/group/{{ subject.group.id }}/">← До групи</a>
+<h3>Лідерборд предмета:</h3>
+<ul>
+    {% for entry in subject_leaderboard %}
+        <li>{{ entry.user.username }}: {{ entry.percent }}% ({{ entry.completed }}/{{ entry.total }})</li>
+    {% endfor %}
+</ul>
+<h3>Дедлайни предмета:</h3>
+<ul>
+    {% for task in subject_deadlines %}
+        <li>
+            <a href="/task/{{ task.id }}/">{{ task.name }}</a>
+            — {% if task.deadline %}
+                <span class="deadline-timer" data-deadline="{{ task.deadline|date:'c' }}"></span>
+            {% else %}
+                без дедлайну
+            {% endif %}
+        </li>
+    {% empty %}
+        <li>Немає дедлайнів.</li>
+    {% endfor %}
+</ul>
+<h3>Tasks:</h3>
+<ul>
+    {% for task in tasks %}
+        <li>
+            <a href="/task/{{ task.id }}//">{{ task.name }}</a>
+            <form method="post" action="/task/{{ task.id }}/delete/" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit">Видалити</button>
+            </form>
+        </li>
+    {% empty %}
+        <li>No tasks yet.</li>
+    {% endfor %}
+</ul>
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="create_task" value="1">
+    <input type="text" name="name" placeholder="Task name">
+    <input type="text" name="description" placeholder="Description">
+    <input type="datetime-local" name="deadline" placeholder="Deadline">
+    <button type="submit">Додати завдання</button>
+</form>
+<script>
+function updateTimers() {
+    const timers = document.querySelectorAll('.deadline-timer');
+    timers.forEach(function(timer) {
+        const deadline = new Date(timer.getAttribute('data-deadline'));
+        const now = new Date();
+        const diff = deadline - now;
+        if (diff > 0) {
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / (1000 * 60)) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+            timer.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s left`;
+        } else {
+            timer.textContent = "⏰ Deadline passed";
+        }
+    });
+}
+setInterval(updateTimers, 1000);
+updateTimers();
+</script>
+{% endblock %} 
