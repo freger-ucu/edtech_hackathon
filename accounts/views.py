@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 import json
-from .models import Group
+from .models import Group, Subject, Task, Subtask
 from django.urls import reverse
 
 # Create your views here.
@@ -105,7 +105,8 @@ def home(request):
     if not request.user.is_authenticated:
         return redirect('signin_page')
     groups = request.user.custom_groups.all()
-    return render(request, 'home.html', {'groups': groups})
+    tasks = Task.objects.filter(subject__group__in=groups).order_by('deadline')
+    return render(request, 'home.html', {'groups': groups, 'tasks': tasks})
 
 def logout_view(request):
     auth_logout(request)
@@ -144,3 +145,68 @@ def group_join(request, share_uuid):
         return redirect('home')
     group.users.add(request.user)
     return redirect('group_detail', group_id=group.id)
+
+@login_required
+def create_subject(request, group_id):
+    group = Group.objects.get(id=group_id)
+    if request.user not in group.users.all():
+        return redirect('home')
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        if name:
+            Subject.objects.create(name=name, group=group)
+    return redirect('group_detail', group_id=group.id)
+
+@login_required
+def delete_subject(request, subject_id):
+    subject = Subject.objects.get(id=subject_id)
+    group_id = subject.group.id
+    if request.user in subject.group.users.all():
+        subject.delete()
+    return redirect('group_detail', group_id=group_id)
+
+@login_required
+def subject_detail(request, subject_id):
+    subject = Subject.objects.get(id=subject_id)
+    group = subject.group
+    if request.user not in group.users.all():
+        return redirect('home')
+    if request.method == 'POST' and 'create_task' in request.POST:
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        deadline = request.POST.get('deadline')
+        if name:
+            Task.objects.create(name=name, description=description, deadline=deadline, subject=subject)
+    tasks = subject.tasks.all()
+    return render(request, 'subject_detail.html', {'subject': subject, 'tasks': tasks})
+
+@login_required
+def delete_task(request, task_id):
+    task = Task.objects.get(id=task_id)
+    subject_id = task.subject.id
+    if request.user in task.subject.group.users.all():
+        task.delete()
+    return redirect('subject_detail', subject_id=subject_id)
+
+@login_required
+def task_detail(request, task_id):
+    task = Task.objects.get(id=task_id)
+    subject = task.subject
+    group = subject.group
+    if request.user not in group.users.all():
+        return redirect('home')
+    if request.method == 'POST' and 'create_subtask' in request.POST:
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        if name:
+            Subtask.objects.create(name=name, description=description, task=task)
+    subtasks = task.subtasks.all()
+    return render(request, 'task_detail.html', {'task': task, 'subtasks': subtasks})
+
+@login_required
+def delete_subtask(request, subtask_id):
+    subtask = Subtask.objects.get(id=subtask_id)
+    task_id = subtask.task.id
+    if request.user in subtask.task.subject.group.users.all():
+        subtask.delete()
+    return redirect('task_detail', task_id=task_id)

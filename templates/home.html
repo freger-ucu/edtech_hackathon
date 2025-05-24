@@ -27,5 +27,17 @@
         {% endfor %}
     </ul>
     <a href="/create_group/">Create new group</a>
+    <h3>Всі дедлайни:</h3>
+    <ul>
+        {% for task in tasks %}
+            <li>
+                <a href="/task/{{ task.id }}/">{{ task.name }}</a>
+                ({{ task.subject.name }} / {{ task.subject.group.name }}) —
+                {% if task.deadline %}{{ task.deadline|date:'Y-m-d H:i' }}{% else %}без дедлайну{% endif %}
+            </li>
+        {% empty %}
+            <li>Немає дедлайнів.</li>
+        {% endfor %}
+    </ul>
 </body>
 </html> 
