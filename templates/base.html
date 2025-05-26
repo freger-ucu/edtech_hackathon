@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}App{% endblock %}</title>
+    <title>{% block title %}App{% endblock %} | Plidno</title>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
     body {
@@ -48,6 +48,7 @@
         width: 100%;
         font-size: 1em;
         box-sizing: border-box;
+        font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
     }
     button {
         background: #b266ff;
@@ -370,7 +371,7 @@
                 {% if breadcrumbs %}
                     {% for crumb in breadcrumbs %}
                         {% if not forloop.last %}
-                            <a href="{{ crumb.url }}">{{ crumb.label }}</a> &gt; 
+                            <a href="{{ crumb.url }}">{{ crumb.label }}</a> &gt;
                         {% else %}
                             <span>{{ crumb.label }}</span>
                         {% endif %}
@@ -395,4 +396,4 @@
         {% block content %}{% endblock %}
     </main>
 </body>
-</html> 
+</html>

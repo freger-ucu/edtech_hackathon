@@ -6,6 +6,26 @@
     <aside class="sidebar">
         <h3 style="font-size:1.8em;text-align:left;margin-bottom:24px;font-family:'Press Start 2P',monospace;">{{ group.name }}</h3>
         <div class="sidebar-section">
+            <div class="sidebar-title">Community Streak</div>
+            {% if streak_done_today %}
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                    <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#7fff5a;"></span>
+                    <span style="color:#7fff5a;font-weight:bold;">Day {{ streak }}</span>
+                </div>
+                <div style="color:#7fff5a;font-size:0.95em;margin:0 0 12px 22px;">
+                    Streak active today!
+                </div>
+            {% else %}
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                    <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#888;"></span>
+                    <span style="color:#bdbdbd;">Day {{ streak }}</span>
+                </div>
+                <div style="color:#bdbdbd;font-size:0.95em;margin:0 0 12px 22px;">
+                    {{ needed_for_streak }} more people needed today
+                </div>
+            {% endif %}
+        </div>
+        <div class="sidebar-section">
             <div class="sidebar-title">Subjects</div>
             {% for subject in group.subjects.all %}
                 <a href="/subject/{{ subject.id }}/" class="sidebar-group">{{ subject.name }}</a>
@@ -14,20 +34,7 @@
             {% endfor %}
         </div>
         <div class="sidebar-section">
-            {% if streak_done_today %}
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                    <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#7fff5a;"></span>
-                    <span style="color:#7fff5a;font-weight:bold;">Streak active today</span>
-                </div>
-            {% else %}
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                    <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#888;"></span>
-                    <span style="color:#bdbdbd;">Streak not active</span>
-                </div>
-                <div style="color:#bdbdbd;font-size:0.95em;margin:0 0 12px 22px;">
-                    {{ needed_for_streak }} more people have to commit to the streak today
-                </div>
-            {% endif %}
+
             <button class="sidebar-btn" onclick="copyLinkAndShowMessage('{{ share_link }}')">Copy share link</button>
             <span id="copy-confirm-message" style="color:#7fff5a; font-size:0.9em; margin-left: 10px;"></span>
         </div>
@@ -126,4 +133,4 @@ function copyLinkAndShowMessage(link) {
     });
 }
 </script>
-{% endblock %} 
+{% endblock %}

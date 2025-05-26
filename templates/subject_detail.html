@@ -6,20 +6,34 @@
     <aside class="sidebar">
         <h3 style="font-size:1.8em;text-align:left;margin-bottom:24px;font-family:'Press Start 2P',monospace;">{{ subject.name }}</h3>
         <div class="sidebar-section">
-            <div class="sidebar-title">Tasks</div>
-            {% for task in tasks %}
-                <a href="/task/{{ task.id }}/" class="sidebar-group">{{ task.name }}</a>
-            {% empty %}
-                <div class="sidebar-group empty">No tasks yet.</div>
-            {% endfor %}
+            <div class="sidebar-title">Community Streak</div>
+            {% if streak_done_today %}
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                    <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#7fff5a;"></span>
+                    <span style="color:#7fff5a;font-weight:bold;">Day {{ streak }}</span>
+                </div>
+                <div style="color:#7fff5a;font-size:0.95em;margin:0 0 12px 22px;">
+                    Streak active today!
+                </div>
+            {% else %}
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                    <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#888;"></span>
+                    <span style="color:#bdbdbd;">Day {{ streak }}</span>
+                </div>
+                <div style="color:#bdbdbd;font-size:0.95em;margin:0 0 12px 22px;">
+                    {{ needed_for_streak }} more people needed today
+                </div>
+            {% endif %}
         </div>
         <div class="sidebar-section" style="margin-top:20px;">
              <div class="sidebar-title">Add New Deadline</div>
-             <form method="post" action="{% url 'create_task_for_subject' subject.id %}" style="display:flex; flex-direction:column; gap: 10px;">
+             <form method="post" action="{% url 'create_task_for_subject' subject.id %}" style="display:flex; flex-direction:column; gap: 10px;" onsubmit="return validateDeadline(this);">
                  {% csrf_token %}
-                 <input type="text" name="name" placeholder="Task name" style="margin-bottom:0;" required>
-                 <input type="datetime-local" name="deadline" required>
-                 <button class="sidebar-btn" type="submit" style="background:#b266ff;color:#fff;font-weight:bold; margin-top: 0;">Add Task</button>
+                 <div style="display:flex; gap: 8px; align-items: center;">
+                     <input type="text" name="name" placeholder="Task name" style="margin:0; flex: 1;" id="newTaskInput" autofocus required>
+                     <button class="sidebar-btn" type="submit" style="margin:0; padding: 12px 16px; width: auto; background:#b266ff;color:#fff;font-weight:bold;">Add</button>
+                 </div>
+                 <input type="datetime-local" name="deadline" required min="{{ now|date:"Y-m-d\\TH:i" }}">
              </form>
          </div>
     </aside>
@@ -88,5 +102,29 @@ function updateTimers() {
 }
 setInterval(updateTimers, 1000);
 updateTimers();
+
+// Set default date to today
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const defaultDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+    document.querySelector('input[type="datetime-local"]').value = defaultDateTime;
+});
+
+function validateDeadline(form) {
+    const deadlineInput = form.querySelector('input[name="deadline"]');
+    const selectedDate = new Date(deadlineInput.value);
+    const now = new Date();
+
+    if (selectedDate <= now) {
+        alert('Please select a future date and time');
+        return false;
+    }
+    return true;
+}
 </script>
-{% endblock %} 
+{% endblock %}

@@ -4,53 +4,62 @@
 <div class="main-layout">
     <!-- Sidebar -->
     <aside class="sidebar">
-        <h3 style="font-size:1.8em;text-align:left;margin-bottom:24px;font-family:'Press Start 2P',monospace;">{{ task.name }}</h3>
+        <h3 style="text-align:left;margin-bottom:24px;">{{ task.name }}</h3>
         <div class="sidebar-section">
-            <div class="sidebar-title">Deadline</div>
-            {% if task.deadline %}
-                <div style="color:#b266ff;font-size:1.1em;margin-bottom:10px;font-family:'Fira Mono', monospace;">{{ task.deadline|date:'d/m/Y H:i' }}</div>
-                 <form method="post" style="margin-bottom:10px;">
-                    {% csrf_token %}
-                    <input type="datetime-local" name="deadline" value="{{ task.deadline|date:"Y-m-d\\TH:i" }}">
-                    <button type="submit" name="change_deadline" style="margin-top:10px;" class="sidebar-btn">Change date</button>
-                </form>
-            {% else %}
-                 <div style="color:#bdbdbd;font-size:1.1em;margin-bottom:10px;font-family:'Fira Mono', monospace;">No deadline set.</div>
-                  <form method="post" style="margin-bottom:10px;">
-                    {% csrf_token %}
-                    <input type="datetime-local" name="deadline">
-                    <button type="submit" name="set_deadline" style="margin-top:10px;" class="sidebar-btn">Set deadline</button>
-                </form>
-            {% endif %}
-        </div>
-        {% if streak is not None %}
-        <div class="sidebar-section">
-             {% if streak_done_today %}
+            <div class="sidebar-title">Community Streak</div>
+            {% if streak_done_today %}
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
                     <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#7fff5a;"></span>
-                    <span style="color:#7fff5a;font-weight:bold;">Streak active today</span>
+                    <span style="color:#7fff5a;font-weight:bold;">Day {{ streak }}</span>
+                </div>
+                <div style="color:#7fff5a;font-size:0.95em;margin:0 0 12px 22px;">
+                    Streak active today!
                 </div>
             {% else %}
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
                     <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#888;"></span>
-                    <span style="color:#bdbdbd;">Streak not active</span>
+                    <span style="color:#bdbdbd;">Day {{ streak }}</span>
                 </div>
                 <div style="color:#bdbdbd;font-size:0.95em;margin:0 0 12px 22px;">
-                    {{ needed_for_streak }} more people have to commit to the streak today
+                    {{ needed_for_streak }} more people needed today
                 </div>
             {% endif %}
         </div>
-         {% endif %}
-         <div class="sidebar-section">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Deadline</div>
+            {% if task.deadline %}
+                <div style="color:#b266ff;font-size:1.1em;margin-bottom:10px;font-family:'Fira Mono', monospace;">{{ task.deadline|date:'d/m/Y H:i' }}</div>
+                 <form method="post" style="margin-bottom:10px;" onsubmit="return validateDeadline(this);">
+                    {% csrf_token %}
+                    <input type="datetime-local" name="deadline" value="{{ task.deadline|date:"Y-m-d\\TH:i" }}" min="{{ now|date:"Y-m-d\\TH:i" }}">
+                    <button type="submit" name="change_deadline" style="margin-top:10px;" class="sidebar-btn">Change date</button>
+                </form>
+            {% else %}
+                 <div style="color:#bdbdbd;font-size:1.1em;margin-bottom:10px;font-family:'Fira Mono', monospace;">No deadline set.</div>
+                  <form method="post" style="margin-bottom:10px;" onsubmit="return validateDeadline(this);">
+                    {% csrf_token %}
+                    <input type="datetime-local" name="deadline" min="{{ now|date:"Y-m-d\\TH:i" }}">
+                    <button type="submit" name="set_deadline" style="margin-top:10px;" class="sidebar-btn">Set deadline</button>
+                </form>
+            {% endif %}
+
              <form method="post">
                  {% csrf_token %}
-                 <button class="sidebar-btn" type="submit" name="delete_task" style="background:#ff4d4d;color:#fff;font-weight:bold;">Delete task</button>
+                 <button class="sidebar-btn" type="submit" name="delete_task" style="background:#ff4d4d;">Delete deadline</button>
              </form>
          </div>
     </aside>
     <!-- Subtasks -->
     <section class="deadlines-section">
-        <h2 class="deadlines-title">Tasks to do</h2>
+        <h2 class="deadlines-title">To do list</h2>
+        <div class="sidebar-section" style="margin-bottom:20px;">
+             <form method="post" style="display:flex; gap: 8px; align-items: center;">
+                 {% csrf_token %}
+                 <input type="hidden" name="create_subtask" value="1">
+                 <input type="text" name="name" placeholder="New task" style="margin:0; flex: 1;" id="newTaskInput" autofocus>
+                 <button class="sidebar-btn" type="submit" style="margin:0; padding: 12px 16px; width: auto;">+</button>
+             </form>
+         </div>
         <div class="deadlines-list">
             {% for subtask in subtasks %}
                  <div class="deadline-card" style="display:flex; flex-direction: row; align-items:center; gap:16px; padding:14px 18px;">
@@ -66,17 +75,10 @@
                     </form>
                  </div>
             {% empty %}
-                <div class="deadline-card empty">No subtasks yet.</div>
+                <div class="deadline-card empty">No tasks yet.</div>
             {% endfor %}
         </div>
-        <div class="sidebar-section" style="margin-top:20px;">
-             <form method="post">
-                 {% csrf_token %}
-                 <input type="hidden" name="create_subtask" value="1">
-                 <input type="text" name="name" placeholder="New subtask name" style="margin-bottom:10px;">
-                 <button class="sidebar-btn" type="submit" style="background:#b266ff;color:#fff;font-weight:bold;">Add subtask</button>
-             </form>
-         </div>
+
     </section>
     <!-- Leaderboard -->
      <section class="deadlines-section" style="max-width:320px;">
@@ -100,9 +102,22 @@
         </div>
     </section>
 </div>
+<script>
+function validateDeadline(form) {
+    const deadlineInput = form.querySelector('input[name="deadline"]');
+    const selectedDate = new Date(deadlineInput.value);
+    const now = new Date();
+
+    if (selectedDate <= now) {
+        alert('Please select a future date and time');
+        return false;
+    }
+    return true;
+}
+</script>
 {% comment %}
 <script>
     // Timer script is in base.html now
 </script>
 {% endcomment %}
-{% endblock %} 
+{% endblock %}

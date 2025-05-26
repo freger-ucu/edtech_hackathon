@@ -3,7 +3,7 @@
 {% block content %}
 <div class="main-layout">
     <aside class="sidebar">
-        <button class="sidebar-btn join-btn">Join community</button>
+        <button class="sidebar-btn join-btn" onclick="showJoinMessage()">Join community</button>
         <a href="{% url 'create_group' %}" class="sidebar-btn create-btn" style="text-decoration: none; color: inherit; width: 100%;">Create community</a>
         <div class="sidebar-section">
             <div class="sidebar-title">Your communities</div>
@@ -38,7 +38,32 @@
         </div>
     </section>
 </div>
+
+<!-- Add popup HTML -->
+<div id="joinPopup" class="popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background-color: #1e1e1e; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); z-index: 1000;">
+    <p style="margin: 0 0 15px 0; color: #ffffff;">Ask your friend to share join link to the community</p>
+    <button onclick="closeJoinPopup()">Close</button>
+</div>
+
 <script>
+// Add popup functionality
+function showJoinMessage() {
+    document.getElementById('joinPopup').style.display = 'block';
+}
+
+function closeJoinPopup() {
+    document.getElementById('joinPopup').style.display = 'none';
+}
+
+// Close popup when clicking outside
+window.onclick = function(event) {
+    const popup = document.getElementById('joinPopup');
+    if (event.target == popup) {
+        popup.style.display = 'none';
+    }
+}
+
 function updateTimers() {
     const timers = document.querySelectorAll('.deadline-timer');
     timers.forEach(function(timer) {
@@ -58,4 +83,4 @@ function updateTimers() {
 setInterval(updateTimers, 1000);
 updateTimers();
 </script>
-{% endblock %} 
+{% endblock %}

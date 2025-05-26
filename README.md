@@ -1,22 +1,29 @@
-# edtech_hackathon
-Ідея: вебдодаток, який дає можливість заходити в кімнату з друзями за якимось паролем і шейрити прогрес, таски. З можливістю трекати власний прогрес (без друзів). Геймифікація: 
+# PLIDNO
 
-Загальний лідерборд по кімнаті
+PLIDNO is a collaborative web app designed to help students stay motivated and on track with their study goals — together.
 
-звалені дедлайни в одному місці 
+## What is PLIDNO?
 
-Одна група. Різні предмети. Один стрік на ГРУПУ. Різні лідерборди на тему і загалом на групу.
+PLIDNO allows you and your friends to join a shared “room” via a password and track your individual progress on upcoming deadlines. You create your own task lists but see each other’s progress — fostering both accountability and healthy competition.
 
-Як в телеграмі робимо штуку: ти можеш дивитися скільки навчаються інші, тільки якщо сам шейриш
+### Core Features
 
-Буде класно якщо 
+- Personal progress tracking with shared visibility
+- Custom task lists per subject
+- Join rooms with friends and track group study momentum
+- One streak per group — don’t break the chain
+- Leaderboards:
+  - Overall leaderboard per room
+  - Subject-specific leaderboards
 
-яким чином підвищує мотивацію? суперництво між друзями
+### Hierarchical Structure
 
-Спільний прогрес, простіше і цікавіше вчитись разом
+- Community → Deadlines → Tasks
 
-Веб-додаток, що трекає прогрес у навчанні студентів.
+  You choose which subjects to prepare for, and PLIDNO helps you organize, visualize, and tackle your tasks.
 
-Ієрархія:
+## Why It Works
 
-Предмети Можна обрати довільну комбінацію з цих предметів та брати участь в підготовці в кожному окремо
+- Friendly competition through visible leaderboards
+- Group motivation: shared streaks and collaborative accountability
+- Everything in one place — all deadlines, all progress, one room
