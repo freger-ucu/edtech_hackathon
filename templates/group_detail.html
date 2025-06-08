@@ -34,8 +34,7 @@
             {% endfor %}
         </div>
         <div class="sidebar-section">
-
-            <button class="sidebar-btn" onclick="copyLinkAndShowMessage('{{ share_link }}')">Copy share link</button>
+            <button class="btn btn-full" onclick="copyLinkAndShowMessage('{{ share_link }}')">Copy share link</button>
             <span id="copy-confirm-message" style="color:#7fff5a; font-size:0.9em; margin-left: 10px;"></span>
         </div>
          {% comment %}
@@ -49,7 +48,7 @@
              <form method="post" action="{% url 'create_subject' group.id %}" style="display:flex; flex-direction:column; gap: 10px;">
                  {% csrf_token %}
                  <input type="text" name="name" placeholder="Subject name" style="margin-bottom:0;" required>
-                 <button class="sidebar-btn" type="submit" style="background:#b266ff;color:#fff;font-weight:bold; margin-top: 0;">Add Subject</button>
+                 <button class="btn btn-full" type="submit">Add Subject</button>
              </form>
          </div>
 
@@ -79,18 +78,18 @@
         </div>
     </section>
     <!-- Leaderboard -->
-    <section class="deadlines-section" style="max-width:320px;">
+    <section class="deadlines-section leaderboard-section">
         <h2 class="deadlines-title">Leaderboard</h2>
         <div class="deadlines-list">
             {% for entry in group_leaderboard %}
-                <div class="deadline-card" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px 12px 18px 12px;">
-                    <span style="font-size:1.2em;margin-bottom:8px;">{{ entry.user.username }}</span>
-                    <div style="width:100%;display:flex;align-items:center;justify-content:center;gap:2px;margin-bottom:8px;">
+                <div class="deadline-card" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px;">
+                    <span style="font-size:1.2em;margin-bottom:8px;word-break:break-word;text-align:center;">{{ entry.user.username }}</span>
+                    <div class="progress-bars" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:2px;margin-bottom:8px;">
                         {% for i in range_20 %}
                             {% if forloop.counter <= entry.green_bars %}
-                                <span style="display:inline-block;width:14px;height:18px;border-radius:3px;background:#7fff5a;margin:0 1px;"></span>
+                                <span style="flex:1;height:18px;border-radius:3px;background:#7fff5a;"></span>
                             {% else %}
-                                <span style="display:inline-block;width:14px;height:18px;border-radius:3px;background:#444;margin:0 1px;"></span>
+                                <span style="flex:1;height:18px;border-radius:3px;background:#444;"></span>
                             {% endif %}
                         {% endfor %}
                     </div>
@@ -100,6 +99,60 @@
         </div>
     </section>
 </div>
+
+<style>
+@media (max-width: 900px) {
+    .leaderboard-section {
+        max-width: none;
+    }
+    .progress-bars {
+        padding: 0;
+    }
+    .progress-bars span {
+        height: 16px;
+    }
+    h3 {
+        font-size: 1.4em !important;
+    }
+    .deadline-card {
+        padding: 14px;
+    }
+    .deadline-path {
+        font-size: 0.9em;
+    }
+    .deadline-title {
+        font-size: 1em;
+    }
+}
+
+@media (max-width: 480px) {
+    .deadline-card {
+        padding: 12px;
+    }
+    .progress-bars span {
+        height: 14px;
+    }
+    h3 {
+        font-size: 1.2em !important;
+    }
+    .deadline-date {
+        position: static;
+        margin-top: 4px;
+    }
+    .deadline-title {
+        font-size: 0.95em;
+    }
+    .deadline-path {
+        font-size: 0.85em;
+    }
+    #copy-confirm-message {
+        display: block;
+        margin: 8px 0 0 0;
+        text-align: center;
+    }
+}
+</style>
+
 <script>
 function updateTimers() {
     const timers = document.querySelectorAll('.deadline-timer');

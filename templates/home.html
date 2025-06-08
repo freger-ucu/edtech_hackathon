@@ -3,8 +3,8 @@
 {% block content %}
 <div class="main-layout">
     <aside class="sidebar">
-        <button class="sidebar-btn join-btn" onclick="showJoinMessage()">Join community</button>
-        <a href="{% url 'create_group' %}" class="sidebar-btn create-btn" style="text-decoration: none; color: inherit; width: 100%;">Create community</a>
+        <button class="btn btn-white btn-full" onclick="showJoinMessage()">Join community</button>
+        <a href="{% url 'create_group' %}" class="btn btn-full" style="margin-top: 10px;">Create community</a>
         <div class="sidebar-section">
             <div class="sidebar-title">Your communities</div>
             {% for group in groups %}
@@ -40,27 +40,171 @@
 </div>
 
 <!-- Add popup HTML -->
-<div id="joinPopup" class="popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    background-color: #1e1e1e; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); z-index: 1000;">
-    <p style="margin: 0 0 15px 0; color: #ffffff;">Ask your friend to share join link to the community</p>
-    <button onclick="closeJoinPopup()">Close</button>
+<div id="joinPopup" class="popup">
+    <div class="popup-content">
+        <p>Ask your friend to share join link to the community</p>
+        <button class="btn" onclick="closeJoinPopup()">Close</button>
+    </div>
 </div>
+
+<style>
+@media (max-width: 900px) {
+    .deadline-card {
+        padding: 14px;
+    }
+    .deadline-path {
+        font-size: 0.9em;
+    }
+    .deadline-title {
+        font-size: 1em;
+    }
+    .sidebar-btn {
+        padding: 12px;
+        font-size: 0.95em;
+    }
+}
+
+@media (max-width: 480px) {
+    .deadline-card {
+        padding: 12px;
+    }
+    .deadline-date {
+        position: static;
+        margin-top: 4px;
+    }
+    .deadline-title {
+        font-size: 0.95em;
+    }
+    .deadline-path {
+        font-size: 0.85em;
+    }
+    .sidebar-btn {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+}
+
+/* Popup styles */
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.popup-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #1e1e1e;
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.popup-content p {
+    margin: 0 0 24px 0;
+    color: #ffffff;
+    font-size: 1.1em;
+    line-height: 1.5;
+}
+
+.popup-content button {
+    min-width: 120px;
+    margin: 0;
+}
+
+@media (max-width: 480px) {
+    .popup-content {
+        padding: 24px;
+        width: 85%;
+    }
+
+    .popup-content p {
+        font-size: 1em;
+        margin: 0 0 20px 0;
+    }
+}
+
+/* Update sidebar spacing */
+.sidebar {
+    padding: 24px;
+}
+
+.sidebar-section {
+    margin-top: 24px;
+}
+
+.sidebar-section:first-child {
+    margin-top: 0;
+}
+
+.sidebar-group {
+    padding: 12px 16px;
+    margin-bottom: 10px;
+}
+
+/* Update deadlines section spacing */
+.deadlines-section {
+    padding: 24px;
+}
+
+.deadlines-title {
+    margin-bottom: 24px;
+}
+
+.deadline-card {
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+@media (max-width: 900px) {
+    .sidebar, .deadlines-section {
+        padding: 20px;
+    }
+
+    .deadline-card {
+        padding: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar, .deadlines-section {
+        padding: 16px;
+    }
+
+    .deadline-card {
+        padding: 12px;
+    }
+}
+</style>
 
 <script>
 // Add popup functionality
 function showJoinMessage() {
     document.getElementById('joinPopup').style.display = 'block';
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
 }
 
 function closeJoinPopup() {
     document.getElementById('joinPopup').style.display = 'none';
+    document.body.style.overflow = ''; // Restore scrolling
 }
 
 // Close popup when clicking outside
 window.onclick = function(event) {
     const popup = document.getElementById('joinPopup');
     if (event.target == popup) {
-        popup.style.display = 'none';
+        closeJoinPopup();
     }
 }
 

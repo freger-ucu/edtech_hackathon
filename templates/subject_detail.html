@@ -31,7 +31,7 @@
                  {% csrf_token %}
                  <div style="display:flex; gap: 8px; align-items: center;">
                      <input type="text" name="name" placeholder="Task name" style="margin:0; flex: 1;" id="newTaskInput" autofocus required>
-                     <button class="sidebar-btn" type="submit" style="margin:0; padding: 12px 16px; width: auto; background:#b266ff;color:#fff;font-weight:bold;">Add</button>
+                     <button class="btn" type="submit">Add</button>
                  </div>
                  <input type="datetime-local" name="deadline" required min="{{ now|date:"Y-m-d\\TH:i" }}">
              </form>
@@ -62,18 +62,18 @@
         </div>
     </section>
     <!-- Leaderboard -->
-     <section class="deadlines-section" style="max-width:320px;">
+    <section class="deadlines-section leaderboard-section">
         <h2 class="deadlines-title">Leaderboard</h2>
-         <div class="deadlines-list">
+        <div class="deadlines-list">
             {% for entry in subject_leaderboard %}
-                <div class="deadline-card" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px 12px 18px 12px;">
-                    <span style="font-size:1.2em;margin-bottom:8px;">{{ entry.user.username }}</span>
-                    <div style="width:100%;display:flex;align-items:center;justify-content:center;gap:2px;margin-bottom:8px;">
+                <div class="deadline-card" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px;">
+                    <span style="font-size:1.2em;margin-bottom:8px;word-break:break-word;text-align:center;">{{ entry.user.username }}</span>
+                    <div class="progress-bars" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:2px;margin-bottom:8px;">
                         {% for i in range_20 %}
                             {% if forloop.counter <= entry.green_bars %}
-                                <span style="display:inline-block;width:14px;height:18px;border-radius:3px;background:#7fff5a;margin:0 1px;"></span>
+                                <span style="flex:1;height:18px;border-radius:3px;background:#7fff5a;"></span>
                             {% else %}
-                                <span style="display:inline-block;width:14px;height:18px;border-radius:3px;background:#444;margin:0 1px;"></span>
+                                <span style="flex:1;height:18px;border-radius:3px;background:#444;"></span>
                             {% endif %}
                         {% endfor %}
                     </div>
@@ -83,6 +83,64 @@
         </div>
     </section>
 </div>
+
+<style>
+@media (max-width: 900px) {
+    .leaderboard-section {
+        max-width: none;
+    }
+    .progress-bars {
+        padding: 0;
+    }
+    .progress-bars span {
+        height: 16px;
+    }
+    h3 {
+        font-size: 1.4em !important;
+    }
+    .deadline-card {
+        padding: 14px;
+    }
+    .deadline-path {
+        font-size: 0.9em;
+    }
+    .deadline-title {
+        font-size: 1em;
+    }
+    input[type="datetime-local"] {
+        font-size: 16px; /* Prevents zoom on mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .deadline-card {
+        padding: 12px;
+    }
+    .progress-bars span {
+        height: 14px;
+    }
+    h3 {
+        font-size: 1.2em !important;
+    }
+    .deadline-date {
+        position: static;
+        margin-top: 4px;
+    }
+    .deadline-title {
+        font-size: 0.95em;
+    }
+    .deadline-path {
+        font-size: 0.85em;
+    }
+    input[type="text"], input[type="datetime-local"] {
+        font-size: 16px;
+    }
+    .sidebar-btn {
+        padding: 10px 12px;
+    }
+}
+</style>
+
 <script>
 function updateTimers() {
     const timers = document.querySelectorAll('.deadline-timer');
@@ -120,8 +178,12 @@ function validateDeadline(form) {
     const selectedDate = new Date(deadlineInput.value);
     const now = new Date();
 
-    if (selectedDate <= now) {
-        alert('Please select a future date and time');
+    // Set both dates to midnight for date-only comparison
+    selectedDate.setHours(0, 0, 0, 0);
+    now.setHours(0, 0, 0, 0);
+
+    if (selectedDate < now) {
+        alert('Please select a future date');
         return false;
     }
     return true;

@@ -4,7 +4,7 @@
 <div class="main-layout">
     <!-- Sidebar -->
     <aside class="sidebar">
-        <h3 style="text-align:left;margin-bottom:24px;">{{ task.name }}</h3>
+        <h3 style="text-align:left;margin-bottom:24px;font-size:1.4em;">{{ task.name }}</h3>
         <div class="sidebar-section">
             <div class="sidebar-title">Community Streak</div>
             {% if streak_done_today %}
@@ -29,25 +29,26 @@
             <div class="sidebar-title">Deadline</div>
             {% if task.deadline %}
                 <div style="color:#b266ff;font-size:1.1em;margin-bottom:10px;font-family:'Fira Mono', monospace;">{{ task.deadline|date:'d/m/Y H:i' }}</div>
-                 <form method="post" style="margin-bottom:10px;" onsubmit="return validateDeadline(this);">
-                    {% csrf_token %}
-                    <input type="datetime-local" name="deadline" value="{{ task.deadline|date:"Y-m-d\\TH:i" }}" min="{{ now|date:"Y-m-d\\TH:i" }}">
-                    <button type="submit" name="change_deadline" style="margin-top:10px;" class="sidebar-btn">Change date</button>
-                </form>
+                <div class="btn-group">
+                    <form method="post" style="margin:0;" onsubmit="return validateDeadline(this);">
+                        {% csrf_token %}
+                        <input type="datetime-local" name="deadline" value="{{ task.deadline|date:"Y-m-d\\TH:i" }}" min="{{ now|date:"Y-m-d\\TH:i" }}">
+                        <button type="submit" name="change_deadline" class="btn btn-full">Change date</button>
+                    </form>
+                    <form method="post" style="margin:0;">
+                        {% csrf_token %}
+                        <button class="btn btn-danger btn-full" type="submit" name="delete_task">Delete deadline</button>
+                    </form>
+                </div>
             {% else %}
-                 <div style="color:#bdbdbd;font-size:1.1em;margin-bottom:10px;font-family:'Fira Mono', monospace;">No deadline set.</div>
-                  <form method="post" style="margin-bottom:10px;" onsubmit="return validateDeadline(this);">
+                <div style="color:#bdbdbd;font-size:1.1em;margin-bottom:10px;font-family:'Fira Mono', monospace;">No deadline set.</div>
+                <form method="post" style="margin:0;" onsubmit="return validateDeadline(this);">
                     {% csrf_token %}
                     <input type="datetime-local" name="deadline" min="{{ now|date:"Y-m-d\\TH:i" }}">
-                    <button type="submit" name="set_deadline" style="margin-top:10px;" class="sidebar-btn">Set deadline</button>
+                    <button type="submit" name="set_deadline" class="btn btn-full">Set deadline</button>
                 </form>
             {% endif %}
-
-             <form method="post">
-                 {% csrf_token %}
-                 <button class="sidebar-btn" type="submit" name="delete_task" style="background:#ff4d4d;">Delete deadline</button>
-             </form>
-         </div>
+        </div>
     </aside>
     <!-- Subtasks -->
     <section class="deadlines-section">
@@ -57,7 +58,7 @@
                  {% csrf_token %}
                  <input type="hidden" name="create_subtask" value="1">
                  <input type="text" name="name" placeholder="New task" style="margin:0; flex: 1;" id="newTaskInput" autofocus>
-                 <button class="sidebar-btn" type="submit" style="margin:0; padding: 12px 16px; width: auto;">+</button>
+                 <button class="btn" type="submit">+</button>
              </form>
          </div>
         <div class="deadlines-list">
@@ -68,31 +69,30 @@
                          {% csrf_token %}
                          <input type="hidden" name="toggle_subtask" value="{{ subtask.id }}">
                      </form>
-                    <span style="flex:1; font-size: 1.05em;">{{ subtask.name }}</span>
+                    <span style="flex:1; font-size: 1.05em; word-break: break-word;">{{ subtask.name }}</span>
                     <form method="post" action="{% url 'delete_subtask' subtask.id %}" style="flex-shrink: 0;">
                         {% csrf_token %}
-                        <button type="submit" name="delete_subtask" value="{{ subtask.id }}" style="width: 30px; height: 30px; padding: 0; margin: 0; background:#ff4d4d; color:#fff; border: none; border-radius: 4px; font-size: 1.1em; display: flex; align-items: center; justify-content: center; cursor: pointer;">🗑️</button>
+                        <button type="submit" name="delete_subtask" value="{{ subtask.id }}" class="btn btn-danger" style="width: 30px; height: 30px; padding: 0; margin: 0; display: flex; align-items: center; justify-content: center;">🗑️</button>
                     </form>
                  </div>
             {% empty %}
                 <div class="deadline-card empty">No tasks yet.</div>
             {% endfor %}
         </div>
-
     </section>
     <!-- Leaderboard -->
-     <section class="deadlines-section" style="max-width:320px;">
+     <section class="deadlines-section leaderboard-section">
         <h2 class="deadlines-title">Leaderboard</h2>
          <div class="deadlines-list">
             {% for entry in leaderboard %}
-                <div class="deadline-card" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px 12px 18px 12px;">
-                    <span style="font-size:1.2em;margin-bottom:8px;">{{ entry.user.username }}</span>
-                    <div style="width:100%;display:flex;align-items:center;justify-content:center;gap:2px;margin-bottom:8px;">
+                <div class="deadline-card" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px;">
+                    <span style="font-size:1.2em;margin-bottom:8px;word-break:break-word;text-align:center;">{{ entry.user.username }}</span>
+                    <div class="progress-bars" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:2px;margin-bottom:8px;">
                         {% for i in range_20 %}
                             {% if forloop.counter <= entry.green_bars %}
-                                <span style="display:inline-block;width:14px;height:18px;border-radius:3px;background:#7fff5a;margin:0 1px;"></span>
+                                <span style="flex:1;height:18px;border-radius:3px;background:#7fff5a;"></span>
                             {% else %}
-                                <span style="display:inline-block;width:14px;height:18px;border-radius:3px;background:#444;margin:0 1px;"></span>
+                                <span style="flex:1;height:18px;border-radius:3px;background:#444;"></span>
                             {% endif %}
                         {% endfor %}
                     </div>
@@ -102,14 +102,45 @@
         </div>
     </section>
 </div>
+
+<style>
+@media (max-width: 900px) {
+    .leaderboard-section {
+        max-width: none;
+    }
+    .progress-bars {
+        padding: 0;
+    }
+    .progress-bars span {
+        height: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .deadline-card {
+        padding: 12px;
+    }
+    .progress-bars span {
+        height: 14px;
+    }
+    h3 {
+        font-size: 1.2em !important;
+    }
+}
+</style>
+
 <script>
 function validateDeadline(form) {
     const deadlineInput = form.querySelector('input[name="deadline"]');
     const selectedDate = new Date(deadlineInput.value);
     const now = new Date();
 
-    if (selectedDate <= now) {
-        alert('Please select a future date and time');
+    // Set both dates to midnight for date-only comparison
+    selectedDate.setHours(0, 0, 0, 0);
+    now.setHours(0, 0, 0, 0);
+
+    if (selectedDate < now) {
+        alert('Please select a future date');
         return false;
     }
     return true;

@@ -3,21 +3,69 @@
 {% block title %}Register{% endblock %}
 {% block content %}
 <div class="centered-form">
-<h2>Register</h2>
-{% if error %}<p class="error">{{ error }}</p>{% endif %}
-{% if success %}<p class="success">{{ success }}</p>{% endif %}
-<form method="post">
-    {% csrf_token %}
-    <label>Username:</label>
-    <input type="text" name="username">
-    <label>Email:</label>
-    <input type="email" name="email">
-    <label>Password:</label>
-    <input type="password" name="password">
-    <label>Repeat password:</label>
-    <input type="password" name="password2">
-    <button type="submit">Create account</button>
-</form>
-<p>Already registered? <a href="/signin/">Sign in</a></p>
+    <h2>Register</h2>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    {% if success %}<p class="success">{{ success }}</p>{% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <label>Username:</label>
+        <input type="text" name="username" required autocomplete="username">
+        <label>Email:</label>
+        <input type="email" name="email" required autocomplete="email">
+        <label>Password:</label>
+        <input type="password" name="password" required autocomplete="new-password">
+        <label>Repeat password:</label>
+        <input type="password" name="password2" required autocomplete="new-password">
+        <button type="submit" class="btn btn-full">Create account</button>
+    </form>
+    <p>Already registered? <a href="/signin/">Sign in</a></p>
 </div>
-{% endblock %} 
+
+<style>
+.error {
+    color: #ff4d4d;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 0.95em;
+}
+
+.success {
+    color: #7fff5a;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 0.95em;
+}
+
+@media (max-width: 480px) {
+    .centered-form {
+        margin: 20px 16px;
+        padding: 24px 16px;
+    }
+
+    .centered-form h2 {
+        font-size: 1.4em;
+        margin-bottom: 24px;
+    }
+
+    .centered-form input[type="text"],
+    .centered-form input[type="email"],
+    .centered-form input[type="password"] {
+        font-size: 16px;
+        padding: 10px 14px;
+    }
+
+    .centered-form button {
+        padding: 12px 0;
+        font-size: 1em;
+    }
+
+    .centered-form p {
+        font-size: 0.9em;
+    }
+
+    .centered-form label {
+        font-size: 0.9em;
+    }
+}
+</style>
+{% endblock %}

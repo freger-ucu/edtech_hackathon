@@ -339,8 +339,9 @@ def create_task_for_subject(request, subject_id):
             try:
                 deadline = datetime.fromisoformat(deadline_str)
                 now = datetime.now()
-                if deadline <= now:
-                    messages.error(request, 'Please select a future date and time')
+                # Compare only dates
+                if deadline.date() < now.date():
+                    messages.error(request, 'Please select a future date')
                 else:
                     Task.objects.create(name=name, description=description, deadline=deadline, subject=subject)
             except ValueError:
@@ -388,8 +389,9 @@ def task_detail(request, task_id):
                 try:
                     deadline = datetime.fromisoformat(deadline_str)
                     now = datetime.now()
-                    if deadline <= now:
-                        messages.error(request, 'Please select a future date and time')
+                    # Compare only dates
+                    if deadline.date() < now.date():
+                        messages.error(request, 'Please select a future date')
                     else:
                         task.deadline = deadline
                         task.save()
