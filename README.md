@@ -18,7 +18,7 @@ PLIDNO allows you and your friends to join a shared “room” via a password an
 
 ### Hierarchical Structure
 
-- Community → Deadlines → Tasks
+  Community → Deadlines → Tasks
 
   You choose which subjects to prepare for, and PLIDNO helps you organize, visualize, and tackle your tasks.
 

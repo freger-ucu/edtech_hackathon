@@ -4,7 +4,9 @@
 <div class="main-layout">
     <aside class="sidebar">
         <button class="btn btn-white btn-full" onclick="showJoinMessage()">Join community</button>
-        <a href="{% url 'create_group' %}" class="btn btn-full" style="margin-top: 10px;">Create community</a>
+        <form action="{% url 'create_group' %}" method="get" style="margin-top: 10px;">
+            <button type="submit" class="btn btn-full">Create community</button>
+        </form>
         <div class="sidebar-section">
             <div class="sidebar-title">Your communities</div>
             {% for group in groups %}
@@ -226,5 +228,21 @@ function updateTimers() {
 }
 setInterval(updateTimers, 1000);
 updateTimers();
+
+function validateDeadline(form) {
+    const deadlineInput = form.querySelector('input[name="deadline"]');
+    const selectedDate = new Date(deadlineInput.value);
+    const now = new Date();
+
+    // Set both dates to midnight for date-only comparison
+    selectedDate.setHours(0, 0, 0, 0);
+    now.setHours(0, 0, 0, 0);
+
+    if (selectedDate < now) {
+        alert('Please select a future date');
+        return false;
+    }
+    return true;
+}
 </script>
 {% endblock %}

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="/static/logo.png">
     <title>{% block title %}App{% endblock %} | Plidno</title>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
@@ -13,6 +14,9 @@
         margin: 0;
         padding: 0;
         min-height: 100vh;
+        overflow-x: hidden; /* Prevent horizontal scrolling */
+        width: 100%;
+        box-sizing: border-box;
     }
     h2, h3, h4 {
         font-family: 'Press Start 2P', 'Fira Mono', 'Consolas', 'Menlo', monospace;
@@ -39,7 +43,7 @@
     form {
         display: inline;
     }
-    input[type="text"], input[type="password"], input[type="email"], input[type="datetime-local"] {
+    input[type="text"], input[type="password"], input[type="email"], input[type="date"] {
         background: #181a1b;
         color: #e0e0e0;
         border: 1px solid #444;
@@ -169,20 +173,21 @@
         color: #fff;
         border-bottom: 1px solid #444;
         margin-bottom: 18px;
-        padding: 0 40px;
+        padding: 0;
         position: sticky;
         top: 0;
         z-index: 100;
+        width: 100%;
+        box-sizing: border-box;
     }
     header nav {
         max-width: 1100px;
         margin: 0 auto;
-        display: flex;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: auto 1fr auto;  /* Three-column layout */
         align-items: center;
-        flex-wrap: wrap;
         gap: 16px;
-        min-height: 70px;
+        min-height: 60px;
         padding: 0 16px;
     }
     .header-logo {
@@ -225,7 +230,7 @@
         min-height: 70vh;
         box-sizing: border-box;
         width: 100%;
-        padding: 0 20px;
+        padding: 0 16px; /* Reduce padding */
     }
     .sidebar {
         width: 260px;
@@ -381,18 +386,41 @@
     }
 
     /* Breadcrumbs container */
+    .breadcrumbs-container {
+        width: 100%;
+        border-top: 1px solid #333;
+        background: #1a1c1e;
+        padding: 8px 16px;
+        display: none; /* Hidden by default on desktop */
+    }
+
     .breadcrumbs {
+        max-width: 1100px;
+        margin: 0 auto;
         display: flex;
         align-items: center;
+        justify-content: center;  /* Center breadcrumbs */
         gap: 8px;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
-        padding: 0 10px;
+        font-size: 0.9em;
+        padding: 4px 16px;  /* Add horizontal padding */
     }
 
     .breadcrumbs::-webkit-scrollbar {
         display: none;
+    }
+
+    .breadcrumbs a {
+        color: #b266ff;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .breadcrumbs span {
+        color: #bdbdbd;
+        white-space: nowrap;
     }
 
     /* Responsive styles */
@@ -408,6 +436,8 @@
             width: 100%;
             min-width: 0;
             max-width: none;
+            padding: 16px;
+            box-sizing: border-box;
         }
 
         .sidebar {
@@ -442,11 +472,37 @@
 
     @media (max-width: 480px) {
         .main-layout {
-            padding: 0 8px;
+            padding: 0 12px;
+            margin-top: 12px;
+        }
+
+        .sidebar, .deadlines-section {
+            padding: 12px;
+        }
+
+        header {
+            margin-bottom: 12px;
         }
 
         header nav {
-            padding: 0 8px;
+            padding: 0 12px;
+            min-height: 56px;
+            gap: 12px;
+        }
+
+        .breadcrumbs-container {
+            display: block; /* Show on mobile */
+            padding: 6px 12px;
+        }
+
+        .breadcrumbs {
+            font-size: 0.85em;
+            padding: 2px 0;
+        }
+
+        /* Hide desktop breadcrumbs in nav */
+        nav .breadcrumbs {
+            display: none;
         }
 
         .header-logo {
@@ -455,6 +511,19 @@
 
         .header-logo img {
             height: 28px;
+        }
+
+        header nav > div:last-child {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95em;
+        }
+
+        header button {
+            padding: 8px 12px;
+            min-width: 70px;
+            font-size: 0.95em;
         }
 
         button, .btn {
@@ -483,6 +552,10 @@
         form + form button,
         form + form .btn {
             margin-top: 6px;
+        }
+
+        input[type="date"] {
+            font-size: 16px; /* Prevents zoom on mobile */
         }
     }
 
@@ -541,6 +614,109 @@
             font-size: 1.4em;
         }
     }
+
+    /* Add specific styles for date input */
+    input[type="date"] {
+        appearance: none;
+        -webkit-appearance: none;
+        position: relative;
+        background: #181a1b url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23b266ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E") no-repeat right 12px center;
+        cursor: pointer;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        opacity: 0;
+        cursor: pointer;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Update main content styles */
+    main {
+        padding: 0;  /* Remove default padding */
+    }
+
+    @media (max-width: 900px) {
+        .main-layout {
+            flex-direction: column;
+            gap: 16px;
+            padding: 0 16px;
+            margin-top: 16px;
+        }
+
+        .sidebar, .deadlines-section {
+            width: 100%;
+            min-width: 0;
+            max-width: none;
+            padding: 16px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .main-layout {
+            padding: 0 12px;
+            margin-top: 12px;
+        }
+
+        .sidebar, .deadlines-section {
+            padding: 12px;
+        }
+    }
+
+    /* Add this to ensure all elements respect box-sizing */
+    *, *:before, *:after {
+        box-sizing: border-box;
+    }
+
+    /* Update desktop breadcrumbs styles */
+    .nav-breadcrumbs {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;  /* Center breadcrumbs */
+        gap: 8px;
+        margin: 0 20px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        font-size: 0.9em;
+        padding: 0 16px;  /* Add padding for better spacing */
+    }
+
+    .nav-breadcrumbs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-breadcrumbs a {
+        color: #b266ff;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .nav-breadcrumbs span {
+        color: #bdbdbd;
+        white-space: nowrap;
+    }
+
+    /* Update mobile styles */
+    @media (max-width: 480px) {
+        .nav-breadcrumbs {
+            display: none;
+        }
+
+        .breadcrumbs-container {
+            display: block;
+        }
+    }
+
+    @media (min-width: 481px) {
+        .breadcrumbs-container {
+            display: none;
+        }
+    }
     </style>
 </head>
 <body>
@@ -552,7 +728,8 @@
                     <img src="/static/logo.png" alt="PLIDNO logo" /> PLIDNO
                 </a>
             </div>
-            <div class="breadcrumbs">
+            <!-- Add desktop breadcrumbs -->
+            <div class="nav-breadcrumbs">
                 {% if breadcrumbs %}
                     {% for crumb in breadcrumbs %}
                         {% if not forloop.last %}
@@ -576,20 +753,23 @@
                 {% endif %}
             </div>
         </nav>
-        <div class="mobile-nav">
-            {% if breadcrumbs %}
-                {% for crumb in breadcrumbs %}
-                    {% if not forloop.last %}
-                        <a href="{{ crumb.url }}" style="display: block; padding: 8px 0;">{{ crumb.label }}</a>
-                    {% else %}
-                        <span style="display: block; padding: 8px 0; color: #fff;">{{ crumb.label }}</span>
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
+        <!-- Keep mobile breadcrumbs -->
+        <div class="breadcrumbs-container">
+            <div class="breadcrumbs">
+                {% if breadcrumbs %}
+                    {% for crumb in breadcrumbs %}
+                        {% if not forloop.last %}
+                            <a href="{{ crumb.url }}">{{ crumb.label }}</a> &gt;
+                        {% else %}
+                            <span>{{ crumb.label }}</span>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
         </div>
     </header>
     {% endif %}
-    <main style="padding:20px;">
+    <main>
         {% block content %}{% endblock %}
     </main>
 
@@ -608,6 +788,22 @@
             !menuBtn.contains(event.target)) {
             nav.classList.remove('active');
         }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set default date to today
+        const dateInputs = document.querySelectorAll('input[type="date"]');
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const defaultDate = `${year}-${month}-${day}`;
+
+        dateInputs.forEach(input => {
+            if (!input.value) {  // Only set if no value is already present
+                input.value = defaultDate;
+            }
+        });
     });
     </script>
 </body>

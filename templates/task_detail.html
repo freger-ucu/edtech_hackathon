@@ -28,11 +28,11 @@
         <div class="sidebar-section">
             <div class="sidebar-title">Deadline</div>
             {% if task.deadline %}
-                <div style="color:#b266ff;font-size:1.1em;margin-bottom:10px;font-family:'Fira Mono', monospace;">{{ task.deadline|date:'d/m/Y H:i' }}</div>
+                <div style="color:#b266ff;font-size:1.1em;margin-bottom:10px;font-family:'Fira Mono', monospace;">{{ task.deadline|date:'d/m/Y' }}</div>
                 <div class="btn-group">
                     <form method="post" style="margin:0;" onsubmit="return validateDeadline(this);">
                         {% csrf_token %}
-                        <input type="datetime-local" name="deadline" value="{{ task.deadline|date:"Y-m-d\\TH:i" }}" min="{{ now|date:"Y-m-d\\TH:i" }}">
+                        <input type="date" name="deadline" value="{{ task.deadline|date:"Y-m-d" }}" min="{{ now|date:"Y-m-d" }}" style="margin-bottom: 8px;">
                         <button type="submit" name="change_deadline" class="btn btn-full">Change date</button>
                     </form>
                     <form method="post" style="margin:0;">
@@ -44,7 +44,7 @@
                 <div style="color:#bdbdbd;font-size:1.1em;margin-bottom:10px;font-family:'Fira Mono', monospace;">No deadline set.</div>
                 <form method="post" style="margin:0;" onsubmit="return validateDeadline(this);">
                     {% csrf_token %}
-                    <input type="datetime-local" name="deadline" min="{{ now|date:"Y-m-d\\TH:i" }}">
+                    <input type="date" name="deadline" min="{{ now|date:"Y-m-d" }}" style="margin-bottom: 8px;">
                     <button type="submit" name="set_deadline" class="btn btn-full">Set deadline</button>
                 </form>
             {% endif %}

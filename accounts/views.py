@@ -233,9 +233,16 @@ def create_subject(request, group_id):
 def delete_subject(request, subject_id):
     subject = Subject.objects.get(id=subject_id)
     group_id = subject.group.id
-    if request.user in subject.group.users.all():
+
+    # Check if user has permission (is in the group)
+    if request.user not in subject.group.users.all():
+        return redirect('home')
+
+    if request.method == 'POST':
         subject.delete()
-    return redirect('group_detail', group_id=group_id)
+        return redirect('group_detail', group_id=group_id)
+
+    return redirect('subject_detail', subject_id=subject_id)
 
 @login_required
 def subject_detail(request, subject_id):
@@ -337,10 +344,9 @@ def create_task_for_subject(request, subject_id):
         if name and deadline_str:
             from datetime import datetime
             try:
-                deadline = datetime.fromisoformat(deadline_str)
-                now = datetime.now()
-                # Compare only dates
-                if deadline.date() < now.date():
+                deadline = datetime.strptime(deadline_str, '%Y-%m-%d').date()
+                now = datetime.now().date()
+                if deadline < now:
                     messages.error(request, 'Please select a future date')
                 else:
                     Task.objects.create(name=name, description=description, deadline=deadline, subject=subject)
