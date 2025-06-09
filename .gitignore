@@ -1,4 +1,7 @@
-.env
+.idea
 *.sqlite3
-__pycache__/
 staticfiles/
+__pycache__/
+**/.DS_Store
+venv/
+*.pyc

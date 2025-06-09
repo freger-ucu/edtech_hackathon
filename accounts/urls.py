@@ -1,9 +1,9 @@
 from django.urls import path
 from . import views
 from django.shortcuts import redirect
+from django.urls import reverse
 
 urlpatterns = [
-    # path('accounts/login/', lambda request: redirect('signin_page', permanent=True)),
     path('', views.home, name='home'),
     path('logout/', views.logout_view, name='logout'),
     path('signup/', views.signup_page, name='signup_page'),
